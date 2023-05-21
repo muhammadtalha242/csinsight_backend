@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import sequelize, { FindAndCountOptions, FindOptions } from 'sequelize';
 import { PagedParameters, QueryFilters, TopKParameters } from '../interfaces/types';
-import { buildMatchObject, quartilePosition } from '../utils/queryUtil';
+import { buildMatchObject, fixYearData, quartilePosition } from '../utils/queryUtil';
 
 
 export default () => {
@@ -25,8 +25,7 @@ export default () => {
       });
 
       // console.log("data: ", data);
-      //   const d = fixYearData2(data, 1936, 2022);
-
+      // fixYearData(data, req.query.yearStart, req.query.yearEnd);
       return data;
     },
     getPaperInfo: async (req: Request<{}, {}, {}, QueryFilters & PagedParameters>, res: Response) => {
@@ -52,7 +51,6 @@ export default () => {
 
         res.json(data);
       } catch (error: any) {
-        /* istanbul ignore next */
         res.status(500).json({ message: error.message });
       }
 
@@ -77,7 +75,6 @@ export default () => {
           const data = await Papers.findAll(findOptions);
           res.json(data);
         } catch (error: any) {
-          /* istanbul ignore next */
           res.status(500).json({ message: error.message });
         }
       }
@@ -108,13 +105,12 @@ export default () => {
           );
 
           const quartileData = await Promise.all(quartileDataPromises);
-
-          data = quartileData.map((quart) => quart[0]?.inCitationsCounts || 0);
+          data = quartileData.map((quart) => quart[0]?.inCitationsCounts || 0
+          );
         }
 
         res.json(data);
       } catch (error: any) {
-        /* istanbul ignore next */
         res.status(500).json({ message: error.message });
       }
     }
