@@ -1,0 +1,19 @@
+FROM node:18
+
+RUN npm --global config set user root
+
+RUN mkdir hortimod-api
+
+WORKDIR /hortimod-api
+
+RUN sudo npm install wait-on -g && sudo npm install typescript -g && sudo npm install bunyan -g && sudo npm install nodemon -g
+COPY package*.json ./
+RUN npm install
+
+COPY . ./
+
+ENV NODE_ENV=staging
+
+CMD npm run start
+
+EXPOSE 8080
