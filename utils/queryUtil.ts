@@ -68,9 +68,9 @@ export function buildSortObject(sortField: string, sortDirection: string) {
     } else {
         let order: any;
         if (sortDirection === 'asc') {
-            order = [[sortField, 'ASC']];
+            order = [sortField, 'ASC'];
         } else {
-            order = [[sortField, 'DESC']];
+            order = [sortField, 'DESC'];
         }
         return {
             order

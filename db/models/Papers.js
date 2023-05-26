@@ -15,7 +15,7 @@ module.exports = (sequelize) => {
       type: DataTypes.ARRAY(DataTypes.STRING),
       allowNull: true,
     },
-    authors: {
+    authorsNames: {
       type: DataTypes.ARRAY(DataTypes.STRING),
       allowNull: true,
     },
@@ -100,5 +100,20 @@ module.exports = (sequelize) => {
     timestamps: false,
   });
 
+  Papers.associate = (models) => {
+    // Add the many-to-many association with the authors model
+    console.log("papers models: ", models);
+    Papers.belongsToMany(models.author, {
+      through: models.PaperAuthor,
+      foreignKey: 'paperId',
+    });
+  };
+
+  // Model1.hasMany(Model2, {
+  //   foreignKey: 'model1Id',
+  // });
+  // Model2.belongsTo(Model1, {
+  //   foreignKey: 'model1Id',
+  // });
   return Papers
 }

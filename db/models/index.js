@@ -29,6 +29,24 @@ Object.keys(db).forEach(modelName => {
   }
 });
 
+// Import the models
+const Paper = require('./Papers')(sequelize);
+const Author = require('./Authors')(sequelize);
+const PaperAuthor = require('./paperAuthor')(sequelize);
+
+// Associate the models
+Paper.associate({ Author, PaperAuthor });
+Author.associate({ Paper, PaperAuthor });
+PaperAuthor.associate({ Paper, Author });
+
+sequelize.sync()
+  .then(() => {
+    console.log('Models synchronized with the database.');
+  })
+  .catch(error => {
+    console.error('Error syncing models:', error);
+  });
+
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 
