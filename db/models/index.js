@@ -30,14 +30,14 @@ Object.keys(db).forEach(modelName => {
 });
 
 // Import the models
-const Paper = require('./Papers')(sequelize);
-const Author = require('./Authors')(sequelize);
-const PaperAuthor = require('./paperAuthor')(sequelize);
+// const Paper = require('./Papers')(sequelize);
+// const Author = require('./Authors')(sequelize);
+// const PaperAuthor = require('./paperAuthor')(sequelize);
 
-// Associate the models
-Paper.associate({ Author, PaperAuthor });
-Author.associate({ Paper, PaperAuthor });
-PaperAuthor.associate({ Paper, Author });
+// // Associate the models
+// Paper.associate({ Author, PaperAuthor });
+// Author.associate({ Paper, PaperAuthor });
+// PaperAuthor.associate({ Paper, Author });
 
 sequelize.sync()
   .then(() => {

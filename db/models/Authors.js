@@ -1,5 +1,7 @@
 // const Sequelize = require('sequelize');
 const { DataTypes } = require('sequelize');
+const Papers = require('./Papers')
+
 module.exports = (sequelize) => {
   const Authors = sequelize.define('author', {
     id: {
@@ -35,16 +37,19 @@ module.exports = (sequelize) => {
     tableName: 'authors',
     timestamps: false,
   });
+  // console.log("Papers: ", Papers);
+  // Authors.belongsToMany(Papers, {through: "paper_author"})
 
-  Authors.associate = (models) => {
-    // Add the many-to-many association with the papers model
-    console.log("Authors models: ", models);
+  // Authors.associate = (models) => {
+  //   // Add the many-to-many association with the papers model
+  //   console.log("Authors models: ", models);
 
-    Authors.belongsToMany(models.paper, {
-      through: models.PaperAuthor,
-      foreignKey: 'authorId',
-    });
-  };
+  //   Authors.belongsToMany(models.paper, {
+  //     through: models.PaperAuthor,
+  //     foreignKey: 'authorId',
+  //   });
+  // };
 
   return Authors
 }
+
