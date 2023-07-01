@@ -30,14 +30,21 @@ Object.keys(db).forEach(modelName => {
 });
 
 // Import the models
-// const Paper = require('./Papers')(sequelize);
-// const Author = require('./Authors')(sequelize);
-// const PaperAuthor = require('./paperAuthor')(sequelize);
+// const Paper = require('./Papers')(sequelize, Sequelize);
+// const Author = require('./Authors')(sequelize, Sequelize);
+// const Venue = require('./venue')(sequelize, Sequelize);
 
-// // Associate the models
+// // // Associate the models
 // Paper.associate({ Author, PaperAuthor });
 // Author.associate({ Paper, PaperAuthor });
 // PaperAuthor.associate({ Paper, Author });
+
+// Define model relationships
+// Paper.belongsToMany(Author, { through: 'PaperAuthor', as:'Author', foreignkey:"id" });
+// Author.belongsToMany(Paper, { through: 'PaperAuthor', as:'Paper', foreignkey:"id" });
+
+// Venue.hasMany(Paper);
+// Paper.belongsTo(Venue);
 
 sequelize.sync()
   .then(() => {
