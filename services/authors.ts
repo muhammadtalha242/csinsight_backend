@@ -6,7 +6,7 @@ import { buildMatchObject, buildSortObject, fixYearData, quartilePosition } from
 
 export default () => {
   const models = require('../db/models');
-  const { paper: Papers, author: Author } = models;
+  const { paper: Papers, authorTable: Author } = models;
 
   return {
     getAuthorsYears: async (req: Request<{}, {}, {}, QueryFilters>, res: Response) => {
