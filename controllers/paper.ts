@@ -5,6 +5,11 @@ import { PagedParameters, QueryFilters, TopKParameters } from '../interfaces/typ
 export default () => {
     const paperService = papers();
     return {
+        addPaper:async (req, res) => {
+          const data = await paperService.addPaper();
+          console.log(data)
+          res.json(data)  
+        },
         getPapers: async (req: Request, res: Response) => {
             const data = await paperService.getPapers(req, res);
             res.json(data);
