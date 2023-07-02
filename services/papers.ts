@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import sequelize, { FindAndCountOptions, FindOptions } from 'sequelize';
 import { PagedParameters, QueryFilters, TopKParameters } from '../interfaces/types';
 import { buildMatchObject, fixYearData, quartilePosition } from '../utils/queryUtil';
-
+const _ = require('lodash');
 
 export default () => {
   const models = require('../db/models');
@@ -26,7 +26,12 @@ export default () => {
 
       // console.log("data: ", data);
       // fixYearData(data, req.query.yearStart, req.query.yearEnd);
-      return data;
+      // Use Lodash to transform the array
+      const transformedArray = _.transform(data, (result, { yearPublished, count }) => {
+        result.years.push(yearPublished);
+        result.count.push(parseInt(count));
+      }, { years: [], count: [] });
+      return transformedArray;
     },
     getPaperInfo: async (req: Request<{}, {}, {}, QueryFilters & PagedParameters>, res: Response) => {
 
