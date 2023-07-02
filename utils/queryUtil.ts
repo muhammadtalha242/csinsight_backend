@@ -2,6 +2,62 @@ import { Op } from 'sequelize';
 import { DatapointsOverTime, QueryFilters } from '../interfaces/types';
 import { NA } from '../constants';
 
+export function buildMatchObjectSemanticScholar(query: QueryFilters): any {
+    const matchObject: any = {};
+    if (query.yearStart) {
+        matchObject.year = {
+            [Op.gte]: parseInt(query.yearStart),
+        };
+    }
+    if (query.yearEnd) {
+        matchObject.year = {
+            ...matchObject.year,
+            [Op.lte]: parseInt(query.yearEnd),
+        };
+    }
+    if (query.authors) {
+        matchObject.authors = {
+            [Op.contains]: JSON.parse(query.authors),
+        };
+    }
+    if (query.venueIds) {
+        matchObject.venueId = {
+            [Op.in]: JSON.parse(query.venueIds),
+        };
+    }
+    if (query.openAccess) {
+        matchObject.isopenaccess = query.openAccess === 'true';
+    }
+    if (query.typesOfPaper) {
+        matchObject.publicationtypes = {
+            [Op.in]: JSON.parse(query.typesOfPaper),
+        };
+    }
+    if (query.fieldsOfStudy) {
+        matchObject.fieldsOfStudy = {
+            [Op.contains]: JSON.parse(query.fieldsOfStudy),
+        };
+    }
+    if (query.publishers) {
+        matchObject.publisher = {
+            [Op.in]: JSON.parse(query.publishers),
+        };
+    }
+    if (query.citationsMin) {
+        matchObject.inCitationsCounts = {
+            ...matchObject.inCitationsCounts,
+            [Op.gte]: parseInt(query.citationsMin),
+        };
+    }
+    if (query.citationsMax) {
+
+        matchObject.inCitationsCounts = {
+            ...matchObject.inCitationsCounts,
+            [Op.lte]: parseInt(query.citationsMax),
+        };
+    }
+    return matchObject;
+}
 
 export function buildMatchObject(query: QueryFilters): any {
     const matchObject: any = {};

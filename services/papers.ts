@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import sequelize, { FindAndCountOptions, FindOptions } from 'sequelize';
 import { PagedParameters, QueryFilters, TopKParameters } from '../interfaces/types';
-import { buildMatchObject, fixYearData, quartilePosition } from '../utils/queryUtil';
+import { buildMatchObject, fixYearData, quartilePosition,buildMatchObjectSemanticScholar } from '../utils/queryUtil';
 
 
 export default () => {
@@ -21,17 +21,17 @@ export default () => {
       return { test, test2, test3, test4 }
     },
     getPapers: async (req: Request<{}, {}, {}, QueryFilters>, res: Response) => {
-      const matchObject = buildMatchObject(req.query)
+      const matchObject = buildMatchObjectSemanticScholar(req.query)
       console.log("matchObject: ", matchObject);
 
       const data = await Papers.findAll({
         where: matchObject,
         attributes: [
-          'yearPublished',
+          'year',
           [sequelize.fn('COUNT', '*'), 'count'],
         ],
-        group: ['yearPublished'],
-        order: [['yearPublished', 'ASC']],
+        group: ['year'],
+        order: [['year', 'ASC']],
         raw: true,
       });
 

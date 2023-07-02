@@ -3,10 +3,13 @@ const readline = require('readline');
 
 // // Specify the path to your JSONL file
 const filePathPapersAuthor = '/Users/abbasm1/Documents/Study/semester1/DS-Seminar/cs-insight-poc-ts/result.json';
-const filePathPapers = '/Users/abbasm1/samples/papers/papers-sample.jsonl';
+// const filePathPapers = '/Users/abbasm1/samples/papers/papers-sample.jsonl';
+const filePathPapers = '/Users/abbasm1/Downloads/20230623_070400_00045_zqqd7_0805d803-390f-4fd4-a1b6-7b12c2abd8b9';
 const filePathAuthors = '/Users/abbasm1/Documents/Study/semester1/DS-Seminar/cs-insight-poc-ts/jsonResultAuthor.json';
+
 const models = require('./db/models');
-const { paper: paperModel, authorTable: authorModel,  PaperAuthor } = models;
+const Papers = require('./db/models/Papers');
+const { paper: paperModel, paper2: paperModel2, authorTable: authorModel,  PaperAuthor } = models;
 // console.log("Models: ", PaperAuthor);
 
 // // Create a readline interface
@@ -2065,32 +2068,32 @@ const PaperAuthors = [
 
 
 
-// const readFile = (filePath, model) => {
-//   // Create a readline interface
-//   const arr = []
-//   const rlPaper = readline.createInterface({
-//     input: fs.createReadStream(filePath),
-//     crlfDelay: Infinity
-//   });
-//   rlPaper.on('line', async (line) => {
-//     try {
-//       // Parse each line as JSON
-//       const jsonObject = JSON.parse(line);
-//       arr.push(jsonObject)
-//       await model.create({ ...jsonObject })
+const readFile = (filePath, model) => {
+  // Create a readline interface
+  const arr = []
+  const rlPaper = readline.createInterface({
+    input: fs.createReadStream(filePath),
+    crlfDelay: Infinity
+  });
+  rlPaper.on('line', async (line) => {
+    try {
+      // Parse each line as JSON
+      const jsonObject = JSON.parse(line);
+      arr.push(jsonObject)
+      await model.create({ ...jsonObject })
 
-//     } catch (error) {
-//       console.error('Error parsing Paper JSON:', error);
-//       rlPaper.close()
-//     }
-//   });
-//   rlPaper.on('close', () => {
-//     console.log(arr)
-//     console.log('Finished reading the JSONL file.', arr);
-//   });
-//   return arr
-// }
-// readFile(filePathAuthors,Author)
+    } catch (error) {
+      console.error('Error parsing Paper JSON:', error);
+      rlPaper.close()
+    }
+  });
+  rlPaper.on('close', () => {
+    console.log(arr)
+    console.log('Finished reading the JSONL file.', arr);
+  });
+  return arr
+}
+readFile(filePathPapers,paperModel2)
 
 
 
@@ -2106,5 +2109,5 @@ const upload = async (array, m) => {
   }
 }
 // upload(newAuthor, authorModel)
-upload(PaperAuthors, PaperAuthor)
+// upload(PaperAuthors, PaperAuthor)
 // upload(papers, paperModel)
