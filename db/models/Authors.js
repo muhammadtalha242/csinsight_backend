@@ -11,17 +11,17 @@ module.exports = (sequelize) => {
       type: DataTypes.JSON,
     },
     url: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
     },
-    name: { type: DataTypes.STRING, },
+    name: { type: DataTypes.TEXT, },
     aliases: {
-      type: DataTypes.ARRAY(DataTypes.STRING),
+      type: DataTypes.ARRAY(DataTypes.TEXT),
     },
     affiliations: {
-      type: DataTypes.STRING
+      type: DataTypes.ARRAY(DataTypes.TEXT),
     },
     homepage: {
-      type: DataTypes.STRING
+      type: DataTypes.TEXT
     },
     papercount: {
       type: DataTypes.INTEGER
@@ -41,23 +41,18 @@ module.exports = (sequelize) => {
       allowNull: true,
     },
     createdBy: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
       allowNull: true,
     },
     orcid: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
       allowNull: true,
     },
   }, {
     tableName: 'authorTable',
     timestamps: false,
   });
-  // console.log("Papers: ", Papers);
-  // Authors.belongsToMany(Papers, {through: "paper_author"})
-
   Authors.associate = (models) => {
-    // Add the many-to-many association with the papers model
-    console.log("Authors models: ", models);
 
     Authors.belongsToMany(models.paper, {
       through: "PaperAuthor",
