@@ -1,13 +1,69 @@
 import { Request, Response } from 'express';
 import sequelize, { FindAndCountOptions, FindOptions } from 'sequelize';
-import { PagedParameters, QueryFilters, TopKParameters } from '../interfaces/types';
+import { IAuthor, PagedParameters, QueryFilters, TopKParameters } from '../interfaces/types';
 import { buildMatchObject, buildSortObject, fixYearData, quartilePosition } from '../utils/queryUtil';
+import * as fs from 'fs';
 
 
 export default () => {
   const models = require('../db/models');
   const { paper: Papers, authorTable: Author } = models;
 
+  function splitArrayIntoSubArrays(largeArray) {
+    const subArraySize = Math.ceil(largeArray.length / 50); // Calculate size of each sub-array
+    const subArrays = [];
+
+    for (let i = 0; i < largeArray.length; i += subArraySize) {
+      subArrays.push(largeArray.slice(i, i + subArraySize));
+    }
+
+    return subArrays;
+  }
+
+  async function readAndLoadFile(filePath: string): Promise<any[]> {
+    const authorsArray = [];
+
+    return new Promise((resolve, reject) => {
+
+      const readStream = fs.createReadStream(filePath, { encoding: 'utf-8' });
+      let jsonData = '';
+      let buffer = ""
+      readStream.on('data', (chunk) => {
+        buffer += chunk
+        jsonData = JSON.parse(JSON.stringify(buffer.toString()));
+        try {
+          const lines = jsonData.split("\n");
+          buffer = lines.pop();
+          const t = lines.map((l) => { return JSON.parse(l) })
+          authorsArray.push(...t);
+        } catch (error) {
+          reject(error);
+        }
+      });
+
+      readStream.on('end', () => {
+        try {
+          resolve(authorsArray);
+        } catch (error) {
+          reject(error);
+        }
+      });
+
+      readStream.on('error', (error) => {
+        reject(error);
+      });
+    });
+  }
+
+  function checkValidity(data: string): boolean {
+    try {
+      JSON.parse(data);
+      return true;
+    } catch (error) {
+      console.log("data: ", data)
+      return false;
+    }
+  }
   return {
     getAuthorsYears: async (req: Request<{}, {}, {}, QueryFilters>, res: Response) => {
       try {
@@ -55,7 +111,7 @@ export default () => {
             // group: ['author.id'],
           })
           console.log("TEST: ", test);
-        
+
           // const test = await Author.findAll({
           //   include: {
           //     model: Papers,
@@ -66,7 +122,7 @@ export default () => {
           //     },
           //   },
           // })
-          
+
           // const rowCountPromise = await Papers.findAndCountAll({
           //   distinct: true,
           //   // where: matchObject,
@@ -183,6 +239,64 @@ export default () => {
         res.json(data);
       } catch (error: any) {
         res.status(500).json({ message: error.message });
+      }
+    },
+    addAuthors: async (req: Request<{}, {}, {}, QueryFilters>, res: Response) => {
+      //Todos
+      /*
+        1. Get author.json file location
+        2. load the file in database.
+      */
+      const locations = ['/Users/abbasm1/Downloads/Authors/20230728_071558_00036_ikv7b_0c7be395-b54d-418d-84e3-d726ebc47d15',
+        // '/Users/abbasm1/Downloads/Authors/20230728_071558_00036_ikv7b_5d169531-54f0-4141-9dfb-1eb36f4249b2',
+        // '/Users/abbasm1/Downloads/Authors/20230728_071558_00036_ikv7b_7a5897ad-07e0-40ce-9a8d-9fe00f490b88',
+        // '/Users/abbasm1/Downloads/Authors/20230728_071558_00036_ikv7b_27c71484-d201-4af1-9c20-2cd40efa8df5',
+        // '/Users/abbasm1/Downloads/Authors/20230728_071558_00036_ikv7b_034c9119-e063-4c15-a0b5-9c3d32bf9e54',
+        // '/Users/abbasm1/Downloads/Authors/20230728_071558_00036_ikv7b_537d5d2b-ed4f-4b6d-b986-e869e7292e9e',
+        // '/Users/abbasm1/Downloads/Authors/20230728_071558_00036_ikv7b_694de3ac-5ee2-4fad-b127-76306961ba5e',
+        // '/Users/abbasm1/Downloads/Authors/20230728_071558_00036_ikv7b_0949b56d-8d4b-4cc4-b93d-eebf52e41eb7',
+        // '/Users/abbasm1/Downloads/Authors/20230728_071558_00036_ikv7b_2872c7ec-e6b6-4db7-b04e-8094fb097a70',
+        // '/Users/abbasm1/Downloads/Authors/20230728_071558_00036_ikv7b_5303a198-d84d-41ad-9e9b-43c57235689f',
+        // '/Users/abbasm1/Downloads/Authors/20230728_071558_00036_ikv7b_05754ca5-7057-47fe-9c65-6bd150289b21',
+        // '/Users/abbasm1/Downloads/Authors/20230728_071558_00036_ikv7b_6597e7fa-e688-47b0-b555-cb974e5c6826',
+        // '/Users/abbasm1/Downloads/Authors/20230728_071558_00036_ikv7b_7972b07e-25d6-40c8-9552-d1029a7b62c4',
+        // '/Users/abbasm1/Downloads/Authors/20230728_071558_00036_ikv7b_81424ba6-4d21-48a3-a4fb-9b536977e185',
+        // '/Users/abbasm1/Downloads/Authors/20230728_071558_00036_ikv7b_970376a8-031b-45c5-9f8c-55bd964a100e',
+        // '/Users/abbasm1/Downloads/Authors/20230728_071558_00036_ikv7b_22189322-0faf-4828-a4e4-f1f2d2a684fc',
+        // '/Users/abbasm1/Downloads/Authors/20230728_071558_00036_ikv7b_a19e5284-3d5d-4d06-9d55-eeff8a888c38',
+        // '/Users/abbasm1/Downloads/Authors/20230728_071558_00036_ikv7b_aad2de8a-6d18-4ae9-b7d1-8a31db63410a',
+        // '/Users/abbasm1/Downloads/Authors/20230728_071558_00036_ikv7b_b8e227d3-8ec2-47a1-ade8-ebb0c414d099',
+        // '/Users/abbasm1/Downloads/Authors/20230728_071558_00036_ikv7b_b881010c-606d-4fa1-9513-f01e4e11ba32',
+        // '/Users/abbasm1/Downloads/Authors/20230728_071558_00036_ikv7b_c49b6e9b-b334-4df4-8222-6eac6bbafc4f',
+        // '/Users/abbasm1/Downloads/Authors/20230728_071558_00036_ikv7b_cccae198-632d-4d23-8bd4-b3facc0e3276',
+        // '/Users/abbasm1/Downloads/Authors/20230728_071558_00036_ikv7b_d3c28104-0214-4719-9f1e-ecd99dc30255',
+        // '/Users/abbasm1/Downloads/Authors/20230728_071558_00036_ikv7b_d8d0adb1-03e3-4069-8bf4-dae916fbe517',
+        // '/Users/abbasm1/Downloads/Authors/20230728_071558_00036_ikv7b_ddebfeca-5280-48c5-a247-b452eaca1a24',
+        // '/Users/abbasm1/Downloads/Authors/20230728_071558_00036_ikv7b_e2ebd4a3-b450-488f-b16e-5254025a6c9a',
+        // '/Users/abbasm1/Downloads/Authors/20230728_071558_00036_ikv7b_e8eb2175-631d-4478-9734-7183a571acfe',
+        '/Users/abbasm1/Downloads/Authors/20230728_071558_00036_ikv7b_e1506dae-307b-4eec-b7f8-7260e941bb44',
+        // '/Users/abbasm1/Downloads/Authors/20230728_071558_00036_ikv7b_f24b1827-8527-4c25-91e3-ddafa7127645',
+        // '/Users/abbasm1/Downloads/Authors/20230728_071558_00036_ikv7b_f43851df-6e57-4c4a-93e1-be9c7fcd5114'
+      ];
+
+      // const location = '/Users/abbasm1/Documents/Study/semester1/DS-Seminar/data/authors.json';
+      // const location = '/Users/abbasm1/Downloads/Authors/20230728_071558_00036_ikv7b_f43851df-6e57-4c4a-93e1-be9c7fcd5114';  //DONE
+      // const location = '/Users/abbasm1/Downloads/Authors/20230728_071558_00036_ikv7b_f24b1827-8527-4c25-91e3-ddafa7127645'; //DONE with bulkCreate
+      const location = '/Users/abbasm1/Downloads/Authors/20230728_071558_00036_ikv7b_e1506dae-307b-4eec-b7f8-7260e941bb44';
+      // const location = '/Users/abbasm1/Downloads/Authors/test';
+      try {
+        const authorsArray: any[] = await readAndLoadFile(location);
+        const subArrays = splitArrayIntoSubArrays(authorsArray)
+        for (const author of subArrays) {
+          // const _ = JSON.parse(author)
+          await Author.bulkCreate(author);
+          // await Author.create(_);
+        }
+        res.json({ message: "Data uploaded successfully.", length: authorsArray.length, array: authorsArray.slice(0, 15) })
+      } catch (error) {
+        console.log("HERE");
+
+        res.json({ message: error.message })
       }
     }
   }
