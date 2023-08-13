@@ -22,7 +22,11 @@ export default () => {
             res: Response) => {
             const data = await authorService.getPaperQuartiles(req, res);
             res.json(data);
-        }
+        },
+        addAuthors: async (req: Request, res: Response) => {
+            const data = await authorService.addAuthors(req, res);
+            res.json(data);
+        },
     }
 
 }
