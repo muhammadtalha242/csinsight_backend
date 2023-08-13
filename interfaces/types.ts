@@ -55,3 +55,61 @@ export interface FindAndCountOptions {
 //     $lte?: number;
 //   };
 // }
+
+
+export interface IAuthor {
+  authorid: string
+  externalids: any
+  url: string
+  name: string
+  aliases: any
+  affiliations: string[]
+  homepage: any
+  papercount: number
+  citationcount: number
+  hindex: number
+  updated: string
+}
+
+
+export interface IExternalids {
+  ACL: any
+  DBLP: any
+  ArXiv: any
+  MAG: string
+  CorpusId: string
+  PubMed: any
+  DOI: any
+  PubMedCentral: any
+}
+
+export interface IAuthorPaper {
+  authorId: string
+  name: string
+}
+
+export interface IJournal {
+  name: string
+  pages: any
+  volume: string
+}
+
+export interface IPaper {
+  corpusid: number
+  externalids: IExternalids
+  url: string
+  title: string
+  authors: IAuthorPaper[]
+  venue: string
+  publicationvenueid: any
+  year: number
+  referencecount: number
+  citationcount: number
+  influentialcitationcount: number
+  isopenaccess: boolean
+  s2fieldsofstudy: any
+  publicationtypes: any
+  publicationdate: string
+  journal: IJournal
+  updated: string
+}
