@@ -14,13 +14,15 @@ export const getRoutes = () => {
   router.get('/papers/years', paperController.getPapers);
   router.get('/papers/info', paperController.getPapersInfo);
   router.get('/papers/topk', paperController.getPapersTopk);
-  router.get('/papers/add', paperController.addPaper);
+  router.get('/papers/add', paperController.addPapers);
   router.get('/papers/quartiles', paperController.getPapersQuartiles);
 
   router.get('/authors/years', authorController.getAuthorsYear);
   router.get('/authors/info', authorController.getAuthorsInfo);
   router.get('/authors/topk', authorController.getPapersTopk);
   router.get('/authors/quartiles', authorController.getPapersQuartiles);
+  router.get('/authors/addAuthors', authorController.addAuthors);
+
 
 
 
