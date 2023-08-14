@@ -2,28 +2,127 @@ import { Request, Response } from 'express';
 import sequelize, { FindAndCountOptions, FindOptions } from 'sequelize';
 import { PagedParameters, QueryFilters, TopKParameters } from '../interfaces/types';
 import { buildMatchObject, fixYearData, quartilePosition } from '../utils/queryUtil';
+import * as fs from 'fs';
+import { readAndLoadFile, splitArrayIntoSubArrays } from '../utils/fileReader';
 
 
 export default () => {
   const models = require('../db/models');
-  console.log("modeles: ", models)
   const { paper: Papers, PaperAuthor, authorTable: Author } = models;
 
   return {
-    addPaper: async () => {
-      // const _paper = { "corpusid": 224735017, "externalids": { "ACL": null, "DBLP": null, "ArXiv": null, "MAG": "952784131", "CorpusId": "224735017", "PubMed": null, "DOI": null, "PubMedCentral": null }, "url": "https://www.semanticscholar.org/paper/97abd35eb7d004e70a58652f2fa762620ad0ea73", "title": "当“商业模式”嫁接“职业规划”", "authors": [{ "authorId": "82841146", "name": "杨吉" }], "venue": "", "publicationvenueid": null, "year": 2012, "referencecount": 0, "citationcount": 0, "influentialcitationcount": 0, "isopenaccess": false, "s2fieldsofstudy": null, "publicationtypes": null, "publicationdate": null, "journal": { "name": "", "pages": "96-96", "volume": "" }, "updated": "2022-01-27T01:47:09.787Z" };
-      // const uploadedPaper = await Papers.create({ id: "test2", authorIds: ["82841146"] })
-      const test = await Author.findAll()
-      const test2 = await Papers.findAll()
-      const test3 = await Papers.findAll({ include: Author })
-      const test4 = await Author.findAll({ include: Papers })
-      console.log("test: ", test, test2, test3, test4)
-      return { test, test2, test3, test4 }
+    addPapers: async (req: Request<{}, {}, {}, QueryFilters>, res: Response) => {
+      //Todos
+      /*
+        1. Get Papers.json file location
+        2. load the file in database.
+      */
+      // const location = '/Users/abbasm1/Downloads/papers/Papers2-13-08-23'; donee
+      const location = '/Users/abbasm1/Downloads/papers/Papers-13-08-23';
+      //DUPLICATE corpus ID 259212440, 39540493 259088906
+      // try {
+      //   const jsonData = JSON.parse(fs.readFileSync(location, 'utf-8'));
+
+      //   for (const data of jsonData) {
+
+      //     // Assuming your JSON data has a "name" property corresponding to the Author model
+      //     // await Papers.create(data);
+      //     let paper_author= []; 
+      //     if (data.authors.length > 0) {
+      //       // authors[index].authorid = paper.authors[0].authorId
+      //       data.authors.forEach(auth => {
+
+      //         paper_author.push({ paperId: data.corpusid, authorId: auth.authorId })
+
+      //       });
+
+      //       // paper.authors.forEach(PA => {
+      //       // })
+      //     } else {
+      //       paper_author.push({ paperId: data.corpusid, authorId: null })
+      //     }
+      //     console.log("paper_author: ", paper_author);
+
+      //     await PaperAuthor.bulkCreate(paper_author);
+      //     // Add other properties based on your JSON data and Author model
+      //   }
+
+      //   console.log('Data uploaded successfully.');
+      //   res.json(jsonData)
+      // } catch (error) {
+      //   console.error('Error uploading data to the database:', error);
+      //   res.status(500).json({ message: error.message });
+      // }
+      try {
+        const PapersAuthorsArray = [];
+        let i = 0
+
+
+        const readStream = fs.createReadStream(location, { encoding: 'utf-8' });
+        let jsonData = '';
+        let buffer = ""
+        readStream.on('data', async (chunk) => {
+          buffer += chunk
+          jsonData = JSON.parse(JSON.stringify(buffer.toString()));
+          let paper_author = [];
+          try {
+            const lines = jsonData.split("\n");
+            buffer = lines.pop();
+            const t = lines.map((l) => {
+              paper_author = []
+
+              const parsed = JSON.parse(l)
+              const paperAuthors = parsed.authors;
+              if (paperAuthors.length > 0) {
+                paperAuthors.forEach(auth => {
+                  paper_author.push({ paperId: parsed.corpusid, authorId: auth.authorId })
+                });
+              } else {
+                paper_author.push({ paperId: parsed.corpusid, authorId: null })
+              }
+              return parsed
+            })
+            console.log("CHUNK: ", i++);
+            // Papers.bulkCreate(t).then((val) => {
+            //   console.log("UPLOADED: ", t.length)
+
+            // }).catch((error) => {
+            //   console.log("ERROR WHILE UPLOAD: ", error);
+
+            // });
+            await PaperAuthor.bulkCreate(paper_author);
+
+          } catch (error) {
+          }
+        });
+
+        readStream.on('end', () => {
+          try {
+
+            res.json({ message: "Data uploaded successfully." })
+
+          } catch (error) {
+          }
+        });
+
+        readStream.on('error', (error) => {
+        });
+        // const papersArray: any[] = await readAndLoadFile(location);
+        // const subArrays = splitArrayIntoSubArrays(papersArray)
+        // for (const paper of subArrays) {
+        //   await Papers.bulkCreate(paper);
+        // }
+      } catch (error) {
+        console.log("HERE");
+
+        res.json({ message: error.message })
+      }
     },
     getPapers: async (req: Request<{}, {}, {}, QueryFilters>, res: Response) => {
       const matchObject = buildMatchObject(req.query)
-      console.log("matchObject: ", matchObject);
-
+      // console.log("matchObject: ", matchObject);
+      // const test3 = await Papers.findAll({ include: Author })
+      // const test4 = await Author.findAll({ include: Papers })
       const data = await Papers.findAll({
         where: matchObject,
         attributes: [
