@@ -6,7 +6,7 @@ const filePathPapersAuthor = '/Users/abbasm1/Documents/Study/semester1/DS-Semina
 const filePathPapers = '/Users/abbasm1/samples/papers/papers-sample.jsonl';
 const filePathAuthors = '/Users/abbasm1/Documents/Study/semester1/DS-Seminar/cs-insight-poc-ts/jsonResultAuthor.json';
 const models = require('./db/models');
-const { paper: paperModel, authorTable: authorModel,  PaperAuthor } = models;
+const { paper: paperModel, authorTable: authorModel, PaperAuthor } = models;
 // console.log("Models: ", PaperAuthor);
 
 // // Create a readline interface
@@ -2094,17 +2094,88 @@ const PaperAuthors = [
 
 
 
-const upload = async (array, m) => {
+// const upload = async (array, m) => {
+//   try {
+//     for (let index = 0; index < array.length; index++) {
+//       const element = array[index];
+//       console.log(element);
+//       await m.create({ ...element })
+//     }
+//   } catch (error) {
+//     console.log("Error: ", error)
+//   }
+// }
+// upload(newAuthor, authorModel)
+// upload(PaperAuthors, PaperAuthor)
+// upload(papers, paperModel)
+
+const axios = require('axios');
+const path = require('path');
+const zlib = require('zlib');
+
+async function downloadFile(url, destination) {
   try {
-    for (let index = 0; index < array.length; index++) {
-      const element = array[index];
-      console.log(element);
-      await m.create({ ...element })
-    }
+    const response = await axios.get(url, { responseType: 'stream' });
+    // const fileStream = fs.createWriteStream(destination);
+
+    // response.data.pipe(fileStream);
+
+    // return new Promise((resolve, reject) => {
+    //   fileStream.on('finish', resolve);
+    //   fileStream.on('error', reject);
+    // });
   } catch (error) {
-    console.log("Error: ", error)
+    console.error(`Error downloading file from ${url}:`, error.message);
+    throw error;
   }
 }
-// upload(newAuthor, authorModel)
-upload(PaperAuthors, PaperAuthor)
-// upload(papers, paperModel)
+
+async function extractFile(gzipFilePath, destinationFolder) {
+  try {
+    const gzipFileStream = fs.createReadStream(gzipFilePath);
+    const unzipStream = zlib.createGunzip();
+    const destinationFileStream = fs.createWriteStream(destinationFolder);
+
+    gzipFileStream.pipe(unzipStream).pipe(destinationFileStream);
+
+    return new Promise((resolve, reject) => {
+      destinationFileStream.on('finish', resolve);
+      destinationFileStream.on('error', reject);
+    });
+  } catch (error) {
+    console.error(`Error extracting file ${gzipFilePath}:`, error.message);
+    throw error;
+  }
+}
+
+async function downloadAndExtractFiles(links) {
+  const downloadFolder = './dataset'; // Change the destination folder as needed
+
+  if (!fs.existsSync(downloadFolder)) {
+    fs.mkdirSync(downloadFolder);
+  }
+
+  for (let i = 0; i < links.length; i++) {
+    const url = links[i];
+    const filename = `authors_${i}`;
+    const gzipFilePath = path.join(downloadFolder, filename);
+
+    await downloadFile(url, gzipFilePath);
+    console.log(`File downloaded from ${url} to ${gzipFilePath}`);
+
+    // const extractionFolder = path.join(downloadFolder, filename);
+    // await extractFile(gzipFilePath, extractionFolder);
+    // console.log(`File extracted to ${extractionFolder}`);
+  }
+}
+
+
+
+
+// Usage example:
+const links = []
+
+
+downloadAndExtractFiles(links).catch((error) => {
+  console.error('Error downloading and extracting files:', error);
+});
