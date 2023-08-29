@@ -3,139 +3,122 @@ import sequelize, { FindAndCountOptions, FindOptions } from 'sequelize';
 import { PagedParameters, QueryFilters, TopKParameters } from '../interfaces/types';
 import { buildMatchObject, fixYearData, quartilePosition } from '../utils/queryUtil';
 import * as fs from 'fs';
-import { readAndLoadFile, splitArrayIntoSubArrays } from '../utils/fileReader';
+import { decompressFile, readAndLoadFile, splitArrayIntoSubArrays } from '../utils/fileReader';
+import axios from 'axios';
+import { downloadFile } from '../utils/fileDownload';
+import { Sequelize, sequelize as sequelizeDB } from '../db/models';
 
 
 export default () => {
   const models = require('../db/models');
   const { paper: Papers, PaperAuthor, authorTable: Author } = models;
-
+  require('dotenv').config();
   return {
     addPapers: async (req: Request<{}, {}, {}, QueryFilters>, res: Response) => {
-      //Todos
-      /*
-        1. Get Papers.json file location
-        2. load the file in database.
-      */
-      // const location = '/Users/abbasm1/Downloads/papers/Papers2-13-08-23'; donee
-      const location = '/Users/abbasm1/Downloads/papers/Papers-13-08-23';
+      const { SECRET_KEY } = process.env;
+      //ERRORS
       //DUPLICATE corpus ID 259212440, 39540493 259088906
-      // try {
-      //   const jsonData = JSON.parse(fs.readFileSync(location, 'utf-8'));
+      //Key (authorId)=(2224708782) is not present in table "authorTable".'
+      // ConnectionAcquireTimeoutError [SequelizeConnectionAcquireTimeoutError]: Operation timeout
 
-      //   for (const data of jsonData) {
-
-      //     // Assuming your JSON data has a "name" property corresponding to the Author model
-      //     // await Papers.create(data);
-      //     let paper_author= []; 
-      //     if (data.authors.length > 0) {
-      //       // authors[index].authorid = paper.authors[0].authorId
-      //       data.authors.forEach(auth => {
-
-      //         paper_author.push({ paperId: data.corpusid, authorId: auth.authorId })
-
-      //       });
-
-      //       // paper.authors.forEach(PA => {
-      //       // })
-      //     } else {
-      //       paper_author.push({ paperId: data.corpusid, authorId: null })
-      //     }
-      //     console.log("paper_author: ", paper_author);
-
-      //     await PaperAuthor.bulkCreate(paper_author);
-      //     // Add other properties based on your JSON data and Author model
-      //   }
-
-      //   console.log('Data uploaded successfully.');
-      //   res.json(jsonData)
-      // } catch (error) {
-      //   console.error('Error uploading data to the database:', error);
-      //   res.status(500).json({ message: error.message });
-      // }
       try {
         const PapersAuthorsArray = [];
         let i = 0
+        //1. Get File URLs
+        const url = "https://api.semanticscholar.org/datasets/v1/release/latest/dataset/papers"
+        const response = await axios.get(url, { headers: { 'x-api-key': SECRET_KEY } })
+        const fileUrls = response.data.files
+        //2. Download Files
+        const filesDownloaded = []
+        for (let index = 0; index < fileUrls.length; index++) {
+          const url = fileUrls[index];
+          const destinationPath = `./data/downloads/papers/Papers-${index}.gz`; // Replace with the desired destination path
+          filesDownloaded.push(await downloadFile(url, destinationPath))
+        }
+        // console.log('Files downloaded successfully.');
+        //3.Read files and upload them in db
 
+        // Drop the foreign key constraints
+        await sequelizeDB.query('ALTER TABLE "PaperAuthor" DROP CONSTRAINT IF EXISTS "PaperAuthor_authorId_fkey"', { raw: true });
+        await sequelizeDB.query('ALTER TABLE "PaperAuthor" DROP CONSTRAINT IF EXISTS "PaperAuthor_paperId_fkey"', { raw: true });
 
-        const readStream = fs.createReadStream(location, { encoding: 'utf-8' });
-        let jsonData = '';
-        let buffer = ""
-        readStream.on('data', async (chunk) => {
-          buffer += chunk
-          jsonData = JSON.parse(JSON.stringify(buffer.toString()));
-          let paper_author = [];
-          try {
-            const lines = jsonData.split("\n");
-            buffer = lines.pop();
-            const t = lines.map((l) => {
-              paper_author = []
+        for (let index = 0; index < filesDownloaded.length; index++) {
+          const filePath = filesDownloaded[index];
+          const folderPath = './data/papers';
 
-              const parsed = JSON.parse(l)
-              const paperAuthors = parsed.authors;
-              if (paperAuthors.length > 0) {
-                paperAuthors.forEach(auth => {
-                  paper_author.push({ paperId: parsed.corpusid, authorId: auth.authorId })
-                });
-              } else {
-                paper_author.push({ paperId: parsed.corpusid, authorId: null })
-              }
-              return parsed
-            })
-            console.log("CHUNK: ", i++);
-            // Papers.bulkCreate(t).then((val) => {
-            //   console.log("UPLOADED: ", t.length)
+          const decompressedFilePath = await decompressFile(filePath, folderPath)
+          const readStream = fs.createReadStream(decompressedFilePath, { encoding: 'utf-8' });
+          let jsonData = '';
+          let buffer = ""
+          readStream.on('data', async (chunk) => {
+            buffer += chunk
+            jsonData = JSON.parse(JSON.stringify(buffer.toString()));
+            let paper_author = [];
+            try {
+              const lines = jsonData.split("\n");
+              buffer = lines.pop();
+              const t = lines.map((l) => {
+                paper_author = []
 
-            // }).catch((error) => {
-            //   console.log("ERROR WHILE UPLOAD: ", error);
+                const parsed = JSON.parse(l)
+                const paperAuthors = parsed.authors;
+                if (paperAuthors.length > 0) {
+                  paperAuthors.forEach(auth => {
+                    paper_author.push({ paperId: parsed.corpusid, authorId: auth.authorId })
+                  });
+                } else {
+                  paper_author.push({ paperId: parsed.corpusid, authorId: null })
+                }
+                return parsed
+              })
+              Papers.bulkCreate(t).then((val) => {
+                PaperAuthor.bulkCreate(paper_author, {
+                  validate: false,
+                  ignoreDuplicates: true,
+                }).then((val) => {
+                })
+              }).catch((error) => {
+                res.json({ message: error.message })
+              });
 
-            // });
-            await PaperAuthor.bulkCreate(paper_author);
+            } catch (error) {
+              res.json({ message: error.message })
 
-          } catch (error) {
-          }
-        });
+            }
+          });
 
-        readStream.on('end', () => {
-          try {
+          readStream.on('end', () => { });
 
-            res.json({ message: "Data uploaded successfully." })
+          readStream.on('error', (error) => {
+            res.json({ message: error.message })
+          });
+        }
+        // Recreate the dropped foreign key constraints
+        await sequelizeDB.query('ALTER TABLE "PaperAuthor" ADD CONSTRAINT "PaperAuthor_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "Authors" ("id") ON DELETE CASCADE', { raw: true });
+        await sequelizeDB.query('ALTER TABLE "PaperAuthor" ADD CONSTRAINT "PaperAuthor_paperId_fkey" FOREIGN KEY ("paperId") REFERENCES "Papers" ("id") ON DELETE CASCADE', { raw: true });
 
-          } catch (error) {
-          }
-        });
+        res.json({ message: "Data uploaded successfully." })
 
-        readStream.on('error', (error) => {
-        });
-        // const papersArray: any[] = await readAndLoadFile(location);
-        // const subArrays = splitArrayIntoSubArrays(papersArray)
-        // for (const paper of subArrays) {
-        //   await Papers.bulkCreate(paper);
-        // }
       } catch (error) {
-        console.log("HERE");
-
         res.json({ message: error.message })
       }
     },
     getPapers: async (req: Request<{}, {}, {}, QueryFilters>, res: Response) => {
       const matchObject = buildMatchObject(req.query)
-      // console.log("matchObject: ", matchObject);
-      // const test3 = await Papers.findAll({ include: Author })
-      // const test4 = await Author.findAll({ include: Papers })
       const data = await Papers.findAll({
-        where: matchObject,
-        attributes: [
-          'yearPublished',
-          [sequelize.fn('COUNT', '*'), 'count'],
-        ],
-        group: ['yearPublished'],
-        order: [['yearPublished', 'ASC']],
-        raw: true,
+        distinct: true,
+        include: Author,
+        limit: 500,
+        // where: matchObject,
+        // attributes: [
+        //   'yearPublished',
+        //   [sequelize.fn('COUNT', '*'), 'count'],
+        // ],
+        // group: ['yearPublished'],
+        // order: [['yearPublished', 'ASC']],
+        // raw: true,
       });
 
-      // console.log("data: ", data);
-      // fixYearData(data, req.query.yearStart, req.query.yearEnd);
       return data;
     },
     getPaperInfo: async (req: Request<{}, {}, {}, QueryFilters & PagedParameters>, res: Response) => {
