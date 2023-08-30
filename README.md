@@ -15,6 +15,14 @@ Welcome to the CS Insight PostgreSQL repository! This repository contains code r
 CS Insight PostgreSQL is a project that focuses on utilizing PostgreSQL to tap into the potential of Semantic Scholar data. Semantic Scholar is a free, AI-powered research tool that helps you discover and understand scientific literature.
 
 This repository houses code that allows you to import, process, and analyze Semantic Scholar data using PostgreSQL. By doing so, we aim to provide researchers, students, and enthusiasts with more powerful tools to gain insights from computer science literature.
+### Built With
+
+[![React][react.js]][react-url]
+[![Node][passport]][passport-url]
+[![Node][swagger]][swagger-url]
+[![Node][express]][express-url]
+[![Node][node.js]][node-url]
+
 
 ## Installation
 
