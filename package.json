@@ -1,7 +1,7 @@
 {
   "name": "cs-insight",
   "version": "1.0.0",
-  "description": "",
+  "description": "CS Insight PostgreSQL is a project that focuses on utilizing PostgreSQL to tap into the potential of Semantic Scholar data. Semantic Scholar is a free, AI-powered research tool that helps you discover and understand scientific literature.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
