@@ -1,9 +1,11 @@
 import { Request, Response } from 'express';
-import sequelize, { FindAndCountOptions, FindOptions } from 'sequelize';
-import { IAuthor, PagedParameters, QueryFilters, TopKParameters } from '../interfaces/types';
-import { buildMatchObject, buildSortObject, fixYearData, quartilePosition } from '../utils/queryUtil';
-import { readAndLoadFile, splitArrayIntoSubArrays } from '../utils/fileReader';
+import sequelize, { FindOptions } from 'sequelize';
 import axios from 'axios';
+
+import { PagedParameters, QueryFilters, TopKParameters } from '../interfaces/types';
+
+import { buildMatchObject, quartilePosition } from '../utils/queryUtil';
+import { readAndLoadFile, splitArrayIntoSubArrays } from '../utils/fileReader';
 import { downloadFile } from '../utils/fileDownload';
 
 export default () => {
@@ -12,14 +14,6 @@ export default () => {
 
   const { paper: Papers, authorTable: Author } = models;
 
-  function checkValidity(data: string): boolean {
-    try {
-      JSON.parse(data);
-      return true;
-    } catch (error) {
-      return false;
-    }
-  }
   return {
     getAuthorsYears: async (req: Request<{}, {}, {}, QueryFilters>, res: Response) => {
       try {
@@ -34,8 +28,6 @@ export default () => {
           raw: true,
         });
 
-        // let data: DatapointsOverTime = timeData[0] || { years: [], counts: [] };
-        // fixYearData(data, req.query.yearStart, req.query.yearEnd);
         res.json(data);
       } catch (error: any) {
         res.status(500).json({ message: error.message });
@@ -66,71 +58,7 @@ export default () => {
             distinct: true,
             include: Papers,
             limit: pageSize,
-            // group: ['author.id'],
           })
-
-          // const test = await Author.findAll({
-          //   include: {
-          //     model: Papers,
-          //     where: {
-          //       authorIds: {
-          //         [sequelize.Op.overlap]: sequelize.literal('ARRAY[author.id]'),
-          //       },
-          //     },
-          //   },
-          // })
-
-          // const rowCountPromise = await Papers.findAndCountAll({
-          //   distinct: true,
-          //   // where: matchObject,
-          //   include: [
-          //     {
-          //       model: Author,
-          //       attributes: [],
-          //       on: sequelize.literal(`author.id = ANY("paper"."authorIds")`),
-          //       where: {
-          //         id: authorId,
-          //       },
-          //     },
-          //   ],
-          // });
-          // console.log("rowCountPromise: ", rowCountPromise);
-
-
-
-          // const rowsPromise = Papers.findAll({
-          //   where: matchObject,
-          //   include: [
-          //     {
-          //       model: Author,
-          //       attributes: [],
-          //     },
-          //   ],
-          //   attributes: [
-          //     'authors',
-          //     [sequelize.fn('COUNT', sequelize.col('*')), 'papersCount'],
-          //     [sequelize.fn('SUM', sequelize.col('inCitationsCounts')), 'inCitationsCounts'],
-          //     [sequelize.fn('MIN', sequelize.col('yearPublished')), 'yearPublishedFirst'],
-          //     [sequelize.fn('MAX', sequelize.col('yearPublished')), 'yearPublishedLast'],
-          //   ],
-          //   group: ['authors'],
-          //   // order: buildSortObject(req.query.sortField, req.query.sortDirection),
-          //   offset: pageSize * (page - 1),
-          //   limit: pageSize,
-          // });
-
-          // const [rows, rowCount] = await Promise.all([rowsPromise, rowCountPromise]);
-
-          // const data = {
-          //   totalAuthors: rowCount.count,
-          //   authors: rows.map((row: any) => ({
-          //     authorId: row.authors,
-          //     papersCount: row.dataValues.papersCount,
-          //     inCitationsCounts: row.dataValues.inCitationsCounts,
-          //     yearPublishedFirst: row.dataValues.yearPublishedFirst,
-          //     yearPublishedLast: row.dataValues.yearPublishedLast,
-          //   })),
-          // };
           res.json({ authorFull, test });
         }
         catch (error: any) {
@@ -213,8 +141,6 @@ export default () => {
           const destinationPath = `./data/downloads/authors/Author-${index}.gz`; // Replace with the desired destination path
           filesDownloaded.push(await downloadFile(url, destinationPath))
         }
-        // console.log('Files downloaded successfully.');
-
         //3.Read files and upload them in db
         for (let index = 0; index < filesDownloaded.length; index++) {
           const filePath = filesDownloaded[index];
