@@ -1,12 +1,14 @@
 import { Request, Response } from 'express';
-import sequelize, { FindAndCountOptions, FindOptions } from 'sequelize';
-import { PagedParameters, QueryFilters, TopKParameters } from '../interfaces/types';
-import { buildMatchObject, fixYearData, quartilePosition } from '../utils/queryUtil';
+import { FindAndCountOptions, FindOptions } from 'sequelize';
 import * as fs from 'fs';
-import { decompressFile, readAndLoadFile, splitArrayIntoSubArrays } from '../utils/fileReader';
+
+import { PagedParameters, QueryFilters, TopKParameters } from '../interfaces/types';
+import { buildMatchObject, quartilePosition } from '../utils/queryUtil';
+import { decompressFile } from '../utils/fileReader';
 import axios from 'axios';
 import { downloadFile } from '../utils/fileDownload';
-import { Sequelize, sequelize as sequelizeDB } from '../db/models';
+
+import { sequelize as sequelizeDB } from '../db/models';
 
 
 export default () => {
@@ -16,6 +18,7 @@ export default () => {
   return {
     addPapers: async (req: Request<{}, {}, {}, QueryFilters>, res: Response) => {
       const { SECRET_KEY } = process.env;
+
       //ERRORS
       //DUPLICATE corpus ID 259212440, 39540493 259088906
       //Key (authorId)=(2224708782) is not present in table "authorTable".'
@@ -109,14 +112,6 @@ export default () => {
         distinct: true,
         include: Author,
         limit: 500,
-        // where: matchObject,
-        // attributes: [
-        //   'yearPublished',
-        //   [sequelize.fn('COUNT', '*'), 'count'],
-        // ],
-        // group: ['yearPublished'],
-        // order: [['yearPublished', 'ASC']],
-        // raw: true,
       });
 
       return data;
