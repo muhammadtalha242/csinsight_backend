@@ -10,12 +10,14 @@ export const getRoutes = () => {
   const paperController = paper();
   const authorController = author();
 
+  //Paper Routes
   router.get('/papers/years', paperController.getPapers);
   router.get('/papers/info', paperController.getPapersInfo);
   router.get('/papers/topk', paperController.getPapersTopk);
   router.get('/papers/addPapers', paperController.addPapers);
   router.get('/papers/quartiles', paperController.getPapersQuartiles);
 
+  //Author Routes
   router.get('/authors/years', authorController.getAuthorsYear);
   router.get('/authors/info', authorController.getAuthorsInfo);
   router.get('/authors/topk', authorController.getPapersTopk);
