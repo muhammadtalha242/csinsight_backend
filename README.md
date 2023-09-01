@@ -34,23 +34,29 @@ You need to have `PostgreSQL` and the `npm` installed.
 To get started with CS Insight PostgreSQL, follow these steps:
 
 1. Clone the repository:
-
      ```
      git clone https://github.com/muhammadtalha242/cs-insight-postgresql/tree/semantic-scholar
-    ```
+     ```
 2. Create a PostgreSQL database.
      ```
      create database "Database_Name"
      ```
-5. Create a `.env` file, please follow `.evn.example` for required values.
-6. Navigate to the project directory
+3. Create a `.env` file, please follow `.evn.example` for required values.
+
+4. Navigate to the project directory
      ```
      cd cs-insight-postgresql
      ```
-8. Install the necessary dependencies 
+5. Install the necessary dependencies 
     ```
     npm install
     ```
+
+### Usage
+
+The services are available on the following ports:
+
+- backend: `8080` (dev)
 
 
 
