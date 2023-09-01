@@ -5,7 +5,6 @@ Welcome to the CS Insight PostgreSQL repository! This repository contains code r
 ## Contents
 
 - [Introduction](#introduction)
-- [Built With](#builtWith)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Contributing](#contributing)
@@ -16,6 +15,7 @@ Welcome to the CS Insight PostgreSQL repository! This repository contains code r
 CS Insight PostgreSQL is a project that focuses on utilizing PostgreSQL to tap into the potential of Semantic Scholar data. Semantic Scholar is a free, AI-powered research tool that helps you discover and understand scientific literature.
 
 This repository houses code that allows you to import, process, and analyze Semantic Scholar data using PostgreSQL. By doing so, we aim to provide researchers, students, and enthusiasts with more powerful tools to gain insights from computer science literature.
+
 ### Built With
 
 [![React][react.js]][react-url]
@@ -59,6 +59,28 @@ The services are available on the following ports:
 - backend: `8080` (dev)
 
 
+<!-- CONTRIBUTING -->
+
+### Contributing
+
+Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+
+If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
+Don't forget to give the project a star! Thanks again!
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+6. We will get in touch and include your feature in the next release.
+
+
+<!-- LICENSE -->
+
+### License
+
+Distributed under the MIT License. See `LICENSE` for more information.
 
 
 <!-- MARKDOWN LINKS & IMAGES -->
