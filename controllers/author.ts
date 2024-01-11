@@ -5,6 +5,11 @@ import { PagedParameters, QueryFilters, TopKParameters } from '../interfaces/typ
 export default () => {
     const authorService = authors();
     return {
+        
+        searchAuthorByName: async (req: Request, res: Response) => {
+            const data = await authorService.searchAuthorByName(req, res);
+            res.json(data);
+        },
         getAuthorsYear: async (req: Request, res: Response) => {
             const data = await authorService.getAuthorsYears(req, res);
             res.json(data);
