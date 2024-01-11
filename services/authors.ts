@@ -1,12 +1,14 @@
 import { Request, Response } from 'express';
 import sequelize, { FindOptions } from 'sequelize';
 import axios from 'axios';
+import { Op } from 'sequelize';
 
 import { PagedParameters, QueryFilters, TopKParameters } from '../interfaces/types';
 
 import { buildMatchObject, quartilePosition } from '../utils/queryUtil';
 import { readAndLoadFile, splitArrayIntoSubArrays } from '../utils/fileReader';
 import { downloadFile } from '../utils/fileDownload';
+import { Sequelize } from '../db/models';
 
 export default () => {
   const models = require('../db/models');
@@ -15,6 +17,31 @@ export default () => {
   const { paper: Papers, authorTable: Author } = models;
 
   return {
+    searchAuthorByName: async (req: Request, res: Response) => {
+      try {
+        const searchQuery = req.query.q;
+    
+        if (!searchQuery) {
+          return res.status(400).send('Query parameter is required');
+        }
+    
+        const authors = await Author.findAll({
+          attributes:['authorid',['name' , 'value']],
+          where: {
+            [Op.or]: [
+                { name: { [Op.like]: `${searchQuery}%` } },
+                Sequelize.literal(`'${searchQuery}' = ANY(aliases)`)
+            ]
+        },
+          limit: 10 
+        });
+    
+        return authors;
+      } catch (error) {
+        console.error(error);
+        return error
+      }
+    },
     getAuthorsYears: async (req: Request<{}, {}, {}, QueryFilters>, res: Response) => {
       try {
         const data = await Papers.findAll({
