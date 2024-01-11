@@ -23,6 +23,9 @@ export const getRoutes = () => {
   router.get('/authors/topk', authorController.getPapersTopk);
   router.get('/authors/quartiles', authorController.getPapersQuartiles);
   router.get('/authors/addAuthors', authorController.addAuthors);
-
+  
+  //Search
+  router.get('/search/authors', authorController.searchAuthorByName);
+  
   return router;
 };
