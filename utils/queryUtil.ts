@@ -2,18 +2,17 @@ import { Op } from 'sequelize';
 import { DatapointsOverTime, QueryFilters } from '../interfaces/types';
 import { NA } from '../constants';
 
-
 export function buildMatchObject(query: QueryFilters): any {
     const matchObject: any = {};
     if (query.yearStart) {
-        matchObject.yearPublished = {
-            [Op.gte]: parseInt(query.yearStart),
+        matchObject.year = {
+            [Op.gte]: Number(query.yearStart),
         };
     }
     if (query.yearEnd) {
-        matchObject.yearPublished = {
-            ...matchObject.yearPublished,
-            [Op.lte]: parseInt(query.yearEnd),
+        matchObject.year = {
+            ...matchObject.year,
+            [Op.lte]: Number(query.yearEnd),
         };
     }
     if (query.authorIds) {
@@ -45,16 +44,15 @@ export function buildMatchObject(query: QueryFilters): any {
         };
     }
     if (query.citationsMin) {
-        matchObject.inCitationsCounts = {
-            ...matchObject.inCitationsCounts,
-            [Op.gte]: parseInt(query.citationsMin),
+        matchObject.citationcount = {
+            ...matchObject.citationcount,
+            [Op.gte]: Number(query.citationsMin),
         };
     }
     if (query.citationsMax) {
-
-        matchObject.inCitationsCounts = {
-            ...matchObject.inCitationsCounts,
-            [Op.lte]: parseInt(query.citationsMax),
+        matchObject.citationcount = {
+            ...matchObject.citationcount,
+            [Op.lte]: Number(query.citationsMax),
         };
     }
     return matchObject;
@@ -102,8 +100,8 @@ export function fixYearData(
     const min = 1936;
     const max = 2022;
     const start =
-        filterYearStart && parseInt(filterYearStart) >= min ? parseInt(filterYearStart) : min;
-    const end = filterYearEnd && parseInt(filterYearEnd) <= max ? parseInt(filterYearEnd) : max;
+        filterYearStart && Number(filterYearStart) >= min ? Number(filterYearStart) : min;
+    const end = filterYearEnd && Number(filterYearEnd) <= max ? Number(filterYearEnd) : max;
     const entries = end - start;
 
     let naValue = 0;
