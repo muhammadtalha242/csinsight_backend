@@ -8,7 +8,7 @@ import { decompressFile } from '../utils/fileReader';
 import axios from 'axios';
 import { downloadFile } from '../utils/fileDownload';
 
-import { sequelize as sequelizeDB } from '../db/models';
+import { Sequelize, sequelize as sequelizeDB } from '../db/models';
 
 
 export default () => {
@@ -108,13 +108,26 @@ export default () => {
     },
     getPapers: async (req: Request<{}, {}, {}, QueryFilters>, res: Response) => {
       const matchObject = buildMatchObject(req.query)
-      const data = await Papers.findAll({
-        distinct: true,
-        include: Author,
-        limit: 500,
-      });
 
-      return data;
+      try {
+        const data = await Papers.findAll({
+          attributes: [
+              [Sequelize.fn('count', Sequelize.col('*')), 'count'],
+              [Sequelize.fn('sum', Sequelize.col('citationcount')), 'totalCitations'], // Sum of citation counts
+              'year'
+          ],
+          where: matchObject,
+          group: ['year'],
+          order: [
+            ['year', 'ASC'] // Optional: To order the results by year
+          ]
+        });
+
+        return data;
+      } catch (error) {
+        return error
+      }
+
     },
     getPaperInfo: async (req: Request<{}, {}, {}, QueryFilters & PagedParameters>, res: Response) => {
 
