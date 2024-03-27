@@ -1,19 +1,41 @@
-// venue.js
-const { DataTypes } = require('sequelize');
+const { DataTypes } = require("sequelize");
 
 module.exports = (sequelize) => {
-  const Venue = sequelize.define('Venue', {
+  const Venue = sequelize.define("Venue", {
     id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.UUID,
       primaryKey: true,
-      autoIncrement: true,
+      defaultValue: DataTypes.UUIDV4,
       allowNull: false,
     },
     name: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
       allowNull: false,
     },
-    // Other venue attributes...
+    alternate_issns: {
+      type: DataTypes.ARRAY(DataTypes.TEXT),
+      defaultValue: [],
+    },
+    alternate_names: {
+      type: DataTypes.ARRAY(DataTypes.TEXT),
+      defaultValue: [],
+    },
+    alternate_urls: {
+      type: DataTypes.ARRAY(DataTypes.TEXT),
+      defaultValue: [],
+    },
+    issn: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    type: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    url: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
   });
 
   return Venue;
