@@ -1,121 +1,91 @@
 // const Sequelize = require('sequelize');
-const { DataTypes } = require('sequelize');
-const Author = require('./Authors')
+const { DataTypes } = require("sequelize");
 module.exports = (sequelize) => {
-  const Papers = sequelize.define('paper', {
-    id: {
-      type: DataTypes.STRING,
-      primaryKey: true,
-      allowNull: false,
+  const Papers = sequelize.define(
+    "paper",
+    {
+      corpusid: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        allowNull: false,
+      },
+      externalids: {
+        type: DataTypes.JSON,
+      },
+      authors: {
+        type: DataTypes.ARRAY(DataTypes.JSON),
+        allowNull: true,
+      },
+      publicationvenueid: {
+        type: DataTypes.TEXT,
+      },
+      referencecount: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
+      s2fieldsofstudy: {
+        type: DataTypes.ARRAY(DataTypes.JSON),
+        allowNull: true,
+      },
+      publicationtypes: {
+        type: DataTypes.ARRAY(DataTypes.TEXT),
+        allowNull: true,
+      },
+      journal: {
+        type: DataTypes.JSON,
+        allowNull: true,
+      },
+      influentialcitationcount: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
+      citationcount: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
+      url: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+      },
+      title: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+      },
+      venue: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+      },
+      isopenaccess: {
+        type: DataTypes.BOOLEAN,
+      },
+      venueId: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+      },
+      year: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
+      updated: {
+        type: DataTypes.DATE,
+        allowNull: true,
+      },
+      publicationdate: {
+        type: DataTypes.DATE,
+        allowNull: true,
+      },
     },
-    abstractText: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    authorIds: {
-      type: DataTypes.ARRAY(DataTypes.STRING),
-      allowNull: true,
-    },
-    authorsNames: {
-      type: DataTypes.ARRAY(DataTypes.STRING),
-      allowNull: true,
-    },
-    createdAt: {
-      type: DataTypes.DATE,
-      allowNull: true,
-    },
-    createdBy: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    dblpId: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    doi: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    fieldsOfStudy: {
-      type: DataTypes.ARRAY(DataTypes.STRING),
-      allowNull: true,
-    },
-    inCitations: {
-      type: DataTypes.ARRAY(DataTypes.STRING),
-      allowNull: true,
-    },
-    inCitationsCounts: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-    },
-    openAccess: {
-      type: DataTypes.BOOLEAN,
-      allowNull: true,
-    },
-    outCitations: {
-      type: DataTypes.ARRAY(DataTypes.STRING),
-      allowNull: true,
-    },
-    outCitationsCounts: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-    },
-    pfdUrls: {
-      type: DataTypes.ARRAY(DataTypes.STRING),
-      allowNull: true,
-    },
-    publisher: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    title: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    typeOfPaper: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    url: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    venue: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    venueId: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    yearPublished: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-    },
-    updatedAt: {
-      type: DataTypes.DATE,
-      allowNull: true,
-    },
-  }, {
-    tableName: 'papers',
-    timestamps: false,
-  });
+    {
+      tableName: "papers",
+      timestamps: false,
+    }
+  );
 
-  // Papers.belongsToMany(Author, {through: "paper_author"})
-  // Papers.associate = (models) => {
-  //   // Add the many-to-many association with the authors model
-  //   console.log("papers models: ", models);
-  //   // Papers.belongsToMany(models.author, {
-  //   //   through: models.PaperAuthor,
-  //   //   foreignKey: 'paperId',
-  //   // });
-  // };
-
-  // Model1.hasMany(Model2, {
-  //   foreignKey: 'model1Id',
-  // });
-  // Model2.belongsTo(Model1, {
-  //   foreignKey: 'model1Id',
-  // });
-  return Papers
-}
+  Papers.associate = (models) => {
+    Papers.belongsToMany(models.authorTable, {
+      through: "PaperAuthor",
+      foreignKey: "paperId",
+    });
+  };
+  return Papers;
+};

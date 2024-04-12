@@ -1,0 +1,861 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Papers",
+    "version": "1.0.0",
+    "contact": {}
+  },
+  "servers": [
+    {
+      "url": "http:localhost/8080"
+    },
+    {
+      "url": "https://cs-insights.uni-goettingen.de"
+    }
+  ],
+  "paths": {
+    "/papers/years": {
+      "get": {
+        "summary": "Get Papers years",
+        "description": "Get Papers years",
+        "operationId": "getPapersYears",
+        "parameters": [
+          {
+            "name": "yearEnd",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "2020"
+            }
+          },
+          {
+            "name": "openAccess",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "true"
+            }
+          },
+          {
+            "name": "authorIds",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "[%2262bf2864158c211376c51887%22]"
+            }
+          },
+          {
+            "name": "venueIds",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "[%2262bf272c158c211376c39940%22]"
+            }
+          },
+          {
+            "name": "typesOfPaper",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "[%22article%22]"
+            }
+          },
+          {
+            "name": "fieldsOfStudy",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "[\"Computer Science\"]"
+            }
+          },
+          {
+            "name": "publishers",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "[%22ACM%20/%20IEEE%22]"
+            }
+          },
+          {
+            "name": "yearStart",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "1966"
+            }
+          },
+          {
+            "name": "citationsMin",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "2"
+            }
+          },
+          {
+            "name": "citationsMax",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "250"
+            }
+          },
+          {
+            "name": "metric",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "inCitationsCounts"
+            }
+          },
+          {
+            "name": "Cache-Control",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "example": "no-cache"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/v0/fe/papers/years": {
+      "get": {
+        "summary": "Get Papers years Prod",
+        "description": "Get Papers years Prod",
+        "operationId": "getPapersYearsProd",
+        "parameters": [
+          {
+            "name": "authorIds",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "[%2262bf2864158c211376c51887%22]"
+            }
+          },
+          {
+            "name": "venueIds",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "[%2262bf272c158c211376c39940%22]"
+            }
+          },
+          {
+            "name": "typesOfPaper",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "[%22article%22]"
+            }
+          },
+          {
+            "name": "fieldsOfStudy",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "[\"Computer Science\"]"
+            }
+          },
+          {
+            "name": "publishers",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "[%22ACM%20/%20IEEE%22]"
+            }
+          },
+          {
+            "name": "metric",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "inCitationsCount"
+            }
+          },
+          {
+            "name": "yearStart",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "1966"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/v0/fe/papers/topk": {
+      "get": {
+        "summary": "Get Papers years Prod Copy",
+        "description": "Get Papers years Prod Copy",
+        "operationId": "getPapersYearsProdCopy",
+        "parameters": [
+          {
+            "name": "authorIds",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "[%2262bf2864158c211376c51887%22]"
+            }
+          },
+          {
+            "name": "venueIds",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "[%2262bf272c158c211376c39940%22]"
+            }
+          },
+          {
+            "name": "openAccess",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "true"
+            }
+          },
+          {
+            "name": "typesOfPaper",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "[%22article%22]"
+            }
+          },
+          {
+            "name": "fieldsOfStudy",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "[\"Computer Science\"]"
+            }
+          },
+          {
+            "name": "publishers",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "[%22ACM%20/%20IEEE%22]"
+            }
+          },
+          {
+            "name": "yearStart",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "1999"
+            }
+          },
+          {
+            "name": "metric",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "inCitationsCount"
+            }
+          },
+          {
+            "name": "k",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "20"
+            }
+          },
+          {
+            "name": "",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/papers/addPapers": {
+      "get": {
+        "summary": "Get Add Papers",
+        "description": "Get Add Papers",
+        "operationId": "getAddPapers",
+        "parameters": [
+          {
+            "name": "authorIds",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "[%2262bf2864158c211376c51887%22]"
+            }
+          },
+          {
+            "name": "venueIds",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "[%2262bf272c158c211376c39940%22]"
+            }
+          },
+          {
+            "name": "typesOfPaper",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "[%22article%22]"
+            }
+          },
+          {
+            "name": "fieldsOfStudy",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "[\"Computer Science\"]"
+            }
+          },
+          {
+            "name": "publishers",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "[%22ACM%20/%20IEEE%22]"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/papers/info": {
+      "get": {
+        "summary": "Get Papers Info",
+        "description": "Get Papers Info",
+        "operationId": "getPapersInfo",
+        "parameters": [
+          {
+            "name": "yearStart",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "1967"
+            }
+          },
+          {
+            "name": "yearEnd",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "2020"
+            }
+          },
+          {
+            "name": "citationsMin",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "2"
+            }
+          },
+          {
+            "name": "citationsMax",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "250"
+            }
+          },
+          {
+            "name": "openAccess",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "true"
+            }
+          },
+          {
+            "name": "metric",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "inCitationsCounts"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "0"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "100"
+            }
+          },
+          {
+            "name": "sortField",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "inCitationsCounts"
+            }
+          },
+          {
+            "name": "sortDirection",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "desc"
+            }
+          },
+          {
+            "name": "",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/papers/topk": {
+      "get": {
+        "summary": "Get Papers ToPK",
+        "description": "Get Papers ToPK",
+        "operationId": "getPapersTopk",
+        "parameters": [
+          {
+            "name": "yearStart",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "1999"
+            }
+          },
+          {
+            "name": "yearEnd",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "2020"
+            }
+          },
+          {
+            "name": "citationsMin",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "2"
+            }
+          },
+          {
+            "name": "citationsMax",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "250"
+            }
+          },
+          {
+            "name": "openAccess",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "true"
+            }
+          },
+          {
+            "name": "metric",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "inCitationsCounts"
+            }
+          },
+          {
+            "name": "k",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "20"
+            }
+          },
+          {
+            "name": "",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/papers/quartiles": {
+      "get": {
+        "summary": "Get Papers Quartiles",
+        "description": "Get Papers Quartiles",
+        "operationId": "getPapersQuartiles",
+        "parameters": [
+          {
+            "name": "quartiles?yearStart",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "1967"
+            }
+          },
+          {
+            "name": "yearEnd",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "2020"
+            }
+          },
+          {
+            "name": "citationsMin",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "2"
+            }
+          },
+          {
+            "name": "citationsMax",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "250"
+            }
+          },
+          {
+            "name": "openAccess",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "true"
+            }
+          },
+          {
+            "name": "metric",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "inCitationsCounts"
+            }
+          },
+          {
+            "name": "",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    }
+  
+    "/authors/years": {
+      "get": {
+        "summary": "Get Authors years",
+        "description": "Get Authors years",
+        "operationId": "getAuthorsYears",
+        "parameters": [
+          {
+            "name": "openAccess",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "true"
+            }
+          },
+          {
+            "name": "yearStart",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "1960"
+            }
+          },
+          {
+            "name": "metric",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "inCitationsCount"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/authors/addAuthors": {
+      "get": {
+        "summary": "Get Add Authors",
+        "description": "Get Add Authors",
+        "operationId": "getAddAuthors",
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/authors/info": {
+      "get": {
+        "summary": "Get Authors Info",
+        "description": "Get Authors Info",
+        "operationId": "getAuthorsInfo",
+        "parameters": [
+          {
+            "name": "yearStart",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "1960"
+            }
+          },
+          {
+            "name": "openAccess",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "true"
+            }
+          },
+          {
+            "name": "metric",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "inCitationsCount"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "0"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "1000"
+            }
+          },
+          {
+            "name": "sortField",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "inCitationsCounts"
+            }
+          },
+          {
+            "name": "sortDirection",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "desc"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/authors/topk": {
+      "get": {
+        "summary": "Get Authors ToPK",
+        "description": "Get Authors ToPK",
+        "operationId": "getAuthorsTopk",
+        "parameters": [
+          {
+            "name": "yearStart",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "1967"
+            }
+          },
+          {
+            "name": "yearEnd",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "2020"
+            }
+          },
+          {
+            "name": "citationsMin",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "2"
+            }
+          },
+          {
+            "name": "citationsMax",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "250"
+            }
+          },
+          {
+            "name": "openAccess",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "true"
+            }
+          },
+          {
+            "name": "metric",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "inCitationsCounts"
+            }
+          },
+          {
+            "name": "k",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "20"
+            }
+          },
+          {
+            "name": "",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/authors/quartiles": {
+      "get": {
+        "summary": "Get Authors Quartiles",
+        "description": "Get Authors Quartiles",
+        "operationId": "getAuthorsQuartiles",
+        "parameters": [
+          {
+            "name": "quartiles?yearStart",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "1967"
+            }
+          },
+          {
+            "name": "yearEnd",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "2020"
+            }
+          },
+          {
+            "name": "citationsMin",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "2"
+            }
+          },
+          {
+            "name": "citationsMax",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "250"
+            }
+          },
+          {
+            "name": "openAccess",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "true"
+            }
+          },
+          {
+            "name": "metric",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "inCitationsCounts"
+            }
+          },
+          {
+            "name": "",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    }
+  },
+  "tags": []
+}
