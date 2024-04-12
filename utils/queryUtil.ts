@@ -15,12 +15,12 @@ export function buildMatchObject(query: QueryFilters): any {
       [Op.lte]: Number(query.yearEnd),
     };
   }
-  // if (query.authorIds.length > 0) {
+  // if (query.authorIds && query.authorIds.length > 0) {
   //   matchObject.authors = {
   //     [Op.in]: query.authorIds,
   //   };
   // }
-  if (query.venueIds.length > 0) {
+  if (query.venueIds && query.venueIds.length > 0) {
     matchObject.venueId = {
       [Op.in]: query.venueIds,
     };
@@ -28,17 +28,17 @@ export function buildMatchObject(query: QueryFilters): any {
   if (query.openAccess) {
     matchObject.openAccess = query.openAccess === "true";
   }
-  if (query.typesOfPaper.length > 0) {
+  if (query.typesOfPaper && query.typesOfPaper.length > 0) {
     matchObject.typeOfPaper = {
       [Op.in]: query.typesOfPaper,
     };
   }
-  if (query.fieldsOfStudy.length > 0) {
+  if (query.fieldsOfStudy && query.fieldsOfStudy.length > 0) {
     matchObject.fieldsOfStudy = {
       [Op.contains]: query.fieldsOfStudy,
     };
   }
-  if (query.publishers.length > 0) {
+  if (query.publishers && query.publishers.length > 0) {
     matchObject.publisher = {
       [Op.in]: query.publishers,
     };

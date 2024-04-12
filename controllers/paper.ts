@@ -5,6 +5,7 @@ import {
   QueryFilters,
   TopKParameters,
 } from "../interfaces/types";
+import redisClient from "../redis";
 
 export default () => {
   const paperService = papers();
@@ -17,12 +18,16 @@ export default () => {
       const data = await paperService.getPapers(req, res);
       res.json(data);
     },
+    getAllPapers: async (req: Request, res: Response) => {
+      const data = await paperService.getAllPapers(req, res);
+      res.json(data);
+    },
     getPapersPost: async (req: Request, res: Response) => {
       const data = await paperService.getPapersPost(req, res);
       res.json(data);
     },
     getPapersInfo: async (
-      req: Request<{}, {}, {}, QueryFilters & PagedParameters>,
+      req: Request<QueryFilters & PagedParameters>,
       res: Response
     ) => {
       const data = await paperService.getPaperInfo(req, res);
@@ -40,6 +45,25 @@ export default () => {
       res: Response
     ) => {
       const data = await paperService.getPaperQuartiles(req, res);
+      res.json(data);
+    },
+    getS2FieldsOfStudy: async (req: Request, res: Response) => {
+      const cacheKey = "s2fieldsOfStudy";
+
+      // redisClient.del("s2fieldsOfStudy", (err, response) => {
+      //   if (err) throw err;
+      //   console.log(`Number of keys removed: ${response}`);
+      // });
+
+      const cachedData = await redisClient.get(cacheKey);
+
+      if (cachedData) {
+        return res.json(JSON.parse(cachedData));
+      }
+
+      const data = await paperService.getS2FieldsOfStudy(req, res);
+      await redisClient.setex(cacheKey, 8000, JSON.stringify(data));
+
       res.json(data);
     },
   };

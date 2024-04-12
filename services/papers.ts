@@ -16,8 +16,13 @@ import { Sequelize, sequelize as sequelizeDB } from "../db/models";
 
 export default () => {
   const models = require("../db/models");
-  const { paper: Papers, PaperAuthor, authorTable: Author } = models;
+  const fs = require("fs");
+  const csv = require("csv-parser");
+  const { paper: Papers, PaperAuthor, authorTable: Author, sequelize } = models;
   require("dotenv").config();
+  // Add the association between PaperAuthor and Papers
+  PaperAuthor.belongsTo(Papers, { foreignKey: "paperId" });
+  Papers.hasMany(PaperAuthor, { foreignKey: "paperId" });
   return {
     addPapers: async (
       req: Request<{}, {}, {}, QueryFilters>,
@@ -136,6 +141,7 @@ export default () => {
         res.json({ message: error.message });
       }
     },
+
     getPapers: async (
       req: Request<{}, {}, {}, QueryFilters>,
       res: Response
@@ -172,10 +178,6 @@ export default () => {
       console.log("matchObject", matchObject);
 
       try {
-        // Add the association between PaperAuthor and Papers
-        PaperAuthor.belongsTo(Papers, { foreignKey: "paperId" });
-        Papers.hasMany(PaperAuthor, { foreignKey: "paperId" });
-
         const queryObject = {
           attributes: [
             [Sequelize.fn("COUNT", Sequelize.col("*")), "count"], // Count of papers
@@ -214,7 +216,7 @@ export default () => {
       }
     },
     getPaperInfo: async (
-      req: Request<{}, {}, {}, QueryFilters & PagedParameters>,
+      req: Request<QueryFilters & PagedParameters>,
       res: Response
     ) => {
       const {
@@ -222,10 +224,10 @@ export default () => {
         pageSize = 10,
         sortField = "yearPublished",
         sortDirection = "asc",
-      } = req.query;
+      } = req.body;
 
       const findOptions: FindAndCountOptions = {
-        where: buildMatchObject(req.query),
+        where: buildMatchObject(req.body),
         order: [[sortField, sortDirection.toUpperCase()]],
         offset: Number(page) * Number(pageSize),
         limit: Number(pageSize),
@@ -233,7 +235,18 @@ export default () => {
 
       try {
         const rowCountPromise = Papers.count(findOptions);
-        const rowsPromise = Papers.findAll(findOptions);
+        const rowsPromise = Papers.findAll({
+          ...findOptions,
+          attributes: [
+            ["corpusid", "id"],
+            "title",
+            "year",
+            "venue",
+            "authors",
+            ["citationcount", "citation"],
+            ["url", "link"],
+          ],
+        });
         const [rowCount, rows] = await Promise.all([
           rowCountPromise,
           rowsPromise,
@@ -309,6 +322,79 @@ export default () => {
         res.json(data);
       } catch (error: any) {
         res.status(500).json({ message: error.message });
+      }
+    },
+    getAllPapers: async (
+      req: Request<{}, {}, {}, QueryFilters>,
+      res: Response
+    ) => {
+      try {
+        const data = await Papers.findAll();
+        return data;
+      } catch (error) {
+        return error;
+      }
+    },
+    getS2FieldsOfStudy: async (req: Request<QueryFilters>, res: Response) => {
+      const {
+        yearStart,
+        yearEnd,
+        citationsMin,
+        citationsMax,
+        authorIds,
+        venueIds,
+        accessType,
+        typesOfPaper,
+        fieldsOfStudy,
+      } = req.body;
+      const query = `
+      
+        SELECT category, COUNT(*) AS category_count
+        FROM (
+          SELECT unnest(s2Fieldsofstudy) ->> 'category' AS category
+          FROM public.papers
+          WHERE s2Fieldsofstudy IS NOT NULL
+          ${yearStart !== "" ? `AND year >= ${Number(yearStart)}` : ""}
+          ${yearEnd !== "" ? `AND year <= ${Number(yearEnd)}` : ""}
+          ${
+            citationsMin !== ""
+              ? `AND citationcount >= ${Number(citationsMin)}`
+              : ""
+          }
+          ${
+            citationsMax !== ""
+              ? `AND citationcount <= ${Number(citationsMax)}`
+              : ""
+          }
+        ) AS derived_table
+        WHERE category IS NOT NULL
+        GROUP BY category
+        ORDER BY category_count DESC
+        LIMIT 5`;
+      `;
+      // const query = `;
+      //   SELECT category, COUNT(*) AS category_count
+      //   FROM (
+      //     SELECT unnest(s2Fieldsofstudy) ->> 'category' AS category
+      //     FROM public.papers
+      //     WHERE s2Fieldsofstudy IS NOT NULL
+
+      //   ) AS derived_table
+      //   WHERE category IS NOT NULL
+      //   GROUP BY category
+      //   ORDER BY category_count DESC
+      //   LIMIT 5;
+      // `;
+
+      try {
+        const results = await sequelize.query(query, {
+          type: sequelize.QueryTypes.SELECT,
+        });
+        console.log("results", results);
+        return results;
+      } catch (error) {
+        console.error("Error executing query:", error);
+        throw error;
       }
     },
   };
