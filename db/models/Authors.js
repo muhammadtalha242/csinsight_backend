@@ -1,54 +1,64 @@
-// const Sequelize = require('sequelize');
 const { DataTypes } = require('sequelize');
-const Papers = require('./Papers')
 
 module.exports = (sequelize) => {
-  const Authors = sequelize.define('author', {
-    id: {
+  const Authors = sequelize.define('authorTable', {
+    authorid: {
       type: DataTypes.STRING,
       primaryKey: true,
       allowNull: false,
     },
-    affiliations: {
-      type: DataTypes.STRING,
-      allowNull: true,
+    externalids: {
+      type: DataTypes.JSON,
     },
+    url: {
+      type: DataTypes.TEXT,
+    },
+    name: { type: DataTypes.TEXT, },
+    aliases: {
+      type: DataTypes.ARRAY(DataTypes.TEXT),
+    },
+    affiliations: {
+      type: DataTypes.ARRAY(DataTypes.TEXT),
+    },
+    homepage: {
+      type: DataTypes.TEXT
+    },
+    papercount: {
+      type: DataTypes.INTEGER
+    },
+    citationcount: {
+      type: DataTypes.INTEGER
+    },
+    hindex: {
+      type: DataTypes.INTEGER
+    },
+    updated: {
+      type: DataTypes.DATE,
+    }
+    ,
     createdAt: {
       type: DataTypes.DATE,
       allowNull: true,
     },
     createdBy: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    fullname: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    number: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.TEXT,
       allowNull: true,
     },
     orcid: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
       allowNull: true,
     },
   }, {
-    tableName: 'authors',
+    tableName: 'authorTable',
     timestamps: false,
   });
-  // console.log("Papers: ", Papers);
-  // Authors.belongsToMany(Papers, {through: "paper_author"})
+  Authors.associate = (models) => {
 
-  // Authors.associate = (models) => {
-  //   // Add the many-to-many association with the papers model
-  //   console.log("Authors models: ", models);
-
-  //   Authors.belongsToMany(models.paper, {
-  //     through: models.PaperAuthor,
-  //     foreignKey: 'authorId',
-  //   });
-  // };
+    Authors.belongsToMany(models.paper, {
+      through: "PaperAuthor",
+      foreignKey: 'authorId',
+    });
+  };
 
   return Authors
 }
