@@ -27,12 +27,8 @@ export async function readAndLoadFile(
     let jsonData = "";
     let buffer = "";
     readStream.on("data", (chunk) => {
-      console.log("chunk: ", chunk);
-
       buffer += chunk;
       jsonData = JSON.parse(JSON.stringify(buffer.toString()));
-      console.log("jsonData", jsonData);
-
       try {
         const lines = jsonData.split("\n");
         buffer = lines.pop();
