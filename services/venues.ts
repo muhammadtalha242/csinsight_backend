@@ -1,13 +1,13 @@
 import axios from "axios";
 import { Request, Response } from "express";
-import { Op } from "sequelize";
+import { FindAndCountOptions, Op } from "sequelize";
 import { downloadFile } from "../utils/fileDownload";
 import {
   decompressFile,
   readAndLoadFile,
   splitArrayIntoSubArrays,
 } from "../utils/fileReader";
-import { QueryFilters } from "../interfaces/types";
+import { PagedParameters, QueryFilters } from "../interfaces/types";
 
 export default () => {
   const models = require("../db/models");
@@ -55,6 +55,58 @@ export default () => {
       } catch (error) {
         console.error(error);
         res.status(500).json({ success: false, error: "Server Error" });
+      }
+    },
+    getVenuesInfo: async (
+      req: Request<QueryFilters & PagedParameters>,
+      res: Response
+    ) => {
+      const {
+        page = 0,
+        pageSize = 10,
+        sortField = "id",
+        sortDirection = "asc",
+      } = req.body;
+
+      const findOptions: FindAndCountOptions = {
+        // where: buildMatchObject(req.body),
+        order: [[sortField, sortDirection.toUpperCase()]],
+        offset: Number(page) * Number(pageSize),
+        limit: Number(pageSize),
+      };
+
+      if ((page != 0 && !page) || !pageSize) {
+        res.status(422).json({
+          message:
+            'The request is missing the required parameter "page", "pageSize".',
+        });
+      } else {
+        try {
+          const rowCountPromise = Venue.count(findOptions);
+          const rowsPromise = Venue.findAll({
+            ...findOptions,
+            attributes: [
+              "id",
+              "name",
+              ["alternate_names", "alternativeNames"],
+              "type",
+              ["url", "link"],
+            ],
+          });
+          const [rowCount, rows] = await Promise.all([
+            rowCountPromise,
+            rowsPromise,
+          ]);
+
+          const data = {
+            rowCount,
+            rows,
+          };
+
+          res.json(data);
+        } catch (error: any) {
+          res.status(500).json({ message: error.message });
+        }
       }
     },
     createVenue: async (req: Request, res: Response) => {
