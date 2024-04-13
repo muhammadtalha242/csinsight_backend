@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import sequelize, { FindOptions } from "sequelize";
+import sequelize, { FindAndCountOptions, FindOptions } from "sequelize";
 import axios from "axios";
 import { Op } from "sequelize";
 
@@ -18,7 +18,7 @@ export default () => {
   const models = require("../db/models");
   require("dotenv").config();
 
-  const { paper: Papers, authorTable: Author } = models;
+  const { paper: Papers, authorTable: Author, paperAuthor } = models;
 
   return {
     searchAuthorByName: async (req: Request, res: Response) => {
@@ -49,10 +49,7 @@ export default () => {
         return error;
       }
     },
-    getAuthorsYears: async (
-      req: Request<{}, {}, {}, QueryFilters>,
-      res: Response
-    ) => {
+    getAuthorsYears: async (req: Request<QueryFilters>, res: Response) => {
       try {
         const data = await Papers.findAll({
           attributes: [
@@ -71,13 +68,39 @@ export default () => {
       }
     },
     getAuthorsInfo: async (
-      req: Request<{}, {}, {}, QueryFilters & PagedParameters>,
+      req: Request<QueryFilters & PagedParameters>,
       res: Response
     ) => {
-      const matchObject = buildMatchObject(req.query);
-      const pageSize = parseInt(req.query.pageSize);
-      const page = parseInt(req.query.page);
+      const query = `SELECT 
+      a.authorid,
+      a."name",
+      a.papercount,
+      a.citationcount,
+      a.hindex,
+        MIN(p.year) as first_year_of_publish,
+        MAX(p.year) as last_year_of_publish
+    FROM 
+        public."authorTable" a
+    JOIN 
+    public."PaperAuthor" pa ON a.authorid = pa."authorId"
+    JOIN 
+        public.papers p ON pa."paperId" = p.corpusid 
+    GROUP BY 
+        a."authorid"
+    `;
+      const {
+        page = 0,
+        pageSize = 10,
+        sortField = "papercount",
+        sortDirection = "asc",
+      } = req.body;
 
+      const findOptions: FindAndCountOptions = {
+        // where: buildMatchObject(req.body),
+        order: [[sortField, sortDirection.toUpperCase()]],
+        offset: Number(page) * Number(pageSize),
+        limit: Number(pageSize),
+      };
       if ((page != 0 && !page) || !pageSize) {
         res.status(422).json({
           message:
@@ -85,18 +108,29 @@ export default () => {
         });
       } else {
         try {
-          const authorFull = await Author.findOne({
-            where: {
-              authorid: "103989795",
-            },
-            include: Papers,
+          const rowCountPromise = Author.count(findOptions);
+          const rowsPromise = Author.findAll({
+            ...findOptions,
+            attributes: [
+              ["authorid", "id"],
+              "name",
+              "hindex",
+              "papercount",
+              ["citationcount", "totalCitations"],
+              ["url", "link"],
+            ],
           });
-          const test = await Author.findAll({
-            distinct: true,
-            include: Papers,
-            limit: pageSize,
-          });
-          res.json({ authorFull, test });
+          const [rowCount, rows] = await Promise.all([
+            rowCountPromise,
+            rowsPromise,
+          ]);
+
+          const data = {
+            rowCount,
+            rows,
+          };
+
+          res.json(data);
         } catch (error: any) {
           res.status(500).json({ message: error.message });
         }
