@@ -14,7 +14,7 @@ export default () => {
             const data = await authorService.getAuthorsYears(req, res);
             res.json(data);
         },
-        getAuthorsInfo: async (req: Request<{}, {}, {}, QueryFilters & PagedParameters>, res: Response) => {
+        getAuthorsInfo: async (req: Request<QueryFilters & PagedParameters>, res: Response) => {
             const data = await authorService.getAuthorsInfo(req, res);
             res.json(data);
         },
