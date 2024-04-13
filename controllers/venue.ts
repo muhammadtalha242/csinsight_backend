@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import venue from "../services/venues";
+import { PagedParameters, QueryFilters } from "../interfaces/types";
 
 export default () => {
   const venueService = venue();
@@ -16,6 +17,10 @@ export default () => {
       const data = await venueService.getVenues(req, res);
       res.json(data);
     },
+    getVenuesInfo: async (req: Request<QueryFilters & PagedParameters>, res: Response) => {
+      const data = await venueService.getVenuesInfo(req, res);
+      res.json(data);
+  },
     getVenueById: async (req: Request, res: Response) => {
       const data = await venueService.getVenueById(req, res);
       res.json(data);
