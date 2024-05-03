@@ -64,7 +64,7 @@ const main = async () => {
   });
 
   /** Routes go here */
-  router.use('/', getRoutes());
+  router.use('/api/', getRoutes());
 
   router.use((req: Request, res: Response, next: NextFunction) => {
     const error = new Error('Not found.');

@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "migrate": "cd db && sequelize db:migrate && sequelize db:seed:all && cd ..",
     "start": "tsc && node dist/index.js | bunyan",
-    "dev": "ts-node index.ts | bunyan"
+    "dev": "ts-node index.ts | bunyan",
+    "build": "tsc -p ."
   },
   "author": "Talha",
   "license": "ISC",
