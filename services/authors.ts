@@ -10,7 +10,7 @@ import {
 } from "../interfaces/types";
 
 import { buildMatchObject, quartilePosition } from "../utils/queryUtil";
-import { readAndLoadFile, splitArrayIntoSubArrays } from "../utils/fileReader";
+import { decompressFile, readAndLoadFile, splitArrayIntoSubArrays } from "../utils/fileReader";
 import { downloadFile } from "../utils/fileDownload";
 import { Sequelize } from "../db/models";
 
@@ -221,12 +221,19 @@ export default () => {
         //3.Read files and upload them in db
         for (let index = 0; index < filesDownloaded.length; index++) {
           const filePath = filesDownloaded[index];
-          const authorsArray: any[] = await readAndLoadFile(
+          const folderPath= "./data/authors"
+          
+          const decompressedFilePath = await decompressFile(
             filePath,
-            "./data/authors"
+            folderPath
+          );
+          const authorsArray: any[] = await readAndLoadFile(
+            decompressedFilePath,
+            folderPath
           );
           const subArrays = splitArrayIntoSubArrays(authorsArray);
-          for (const author of subArrays) {
+          for (let i = 0; i < subArrays.length; i++) {
+            const author = subArrays[i];
             const authorArr = author.filter((auth) => auth.authorid !== null);
             await Author.bulkCreate(authorArr, {
               ignoreDuplicates: true,

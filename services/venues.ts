@@ -11,7 +11,7 @@ import { PagedParameters, QueryFilters } from "../interfaces/types";
 
 export default () => {
   const models = require("../db/models");
-  const { Venue } = models;
+  const { venue: Venue } = models;
   require("dotenv").config();
   return {
     searchVenueByName: async (req: Request, res: Response) => {
@@ -216,7 +216,6 @@ export default () => {
             filePath,
             folderPath
           );
-          console.log("Decompressed File Path: ", decompressedFilePath);
           const venuesData = await readAndLoadFile(
             decompressedFilePath,
             folderPath

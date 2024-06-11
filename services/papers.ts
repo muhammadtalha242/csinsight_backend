@@ -20,7 +20,7 @@ export default () => {
   const models = require("../db/models");
   const fs = require("fs");
   const csv = require("csv-parser");
-  const { paper: Papers, PaperAuthor, authorTable: Author, sequelize } = models;
+  const { paper: Papers, paperAuthor: PaperAuthor, authorTable: Author, sequelize } = models;
   require("dotenv").config();
   // Add the association between PaperAuthor and Papers
   PaperAuthor.belongsTo(Papers, { foreignKey: "paperId" });
@@ -39,7 +39,6 @@ export default () => {
       // ConnectionAcquireTimeoutError [SequelizeConnectionAcquireTimeoutError]: Operation timeout
 
       try {
-        const PapersAuthorsArray = [];
         let i = 0;
         //1. Get File URLs
         const url =
@@ -50,21 +49,22 @@ export default () => {
         const fileUrls = response.data.files;
         //2. Download Files
         const filesDownloaded = [];
+        
         for (let index = 0; index < fileUrls.length; index++) {
           const url = fileUrls[index];
           const destinationPath = `./data/downloads/papers/Papers-${index}.gz`; // Replace with the desired destination path
           filesDownloaded.push(await downloadFile(url, destinationPath));
         }
-        // console.log('Files downloaded successfully.');
+        console.log('Files downloaded successfully.');
         //3.Read files and upload them in db
 
         // Drop the foreign key constraints
         await sequelizeDB.query(
-          'ALTER TABLE "PaperAuthor" DROP CONSTRAINT IF EXISTS "PaperAuthor_authorId_fkey"',
+          'ALTER TABLE "paperAuthor" DROP CONSTRAINT IF EXISTS "paperAuthor_authorId_fkey"',
           { raw: true }
         );
         await sequelizeDB.query(
-          'ALTER TABLE "PaperAuthor" DROP CONSTRAINT IF EXISTS "PaperAuthor_paperId_fkey"',
+          'ALTER TABLE "paperAuthor" DROP CONSTRAINT IF EXISTS "paperAuthor_paperId_fkey"',
           { raw: true }
         );
 
@@ -131,11 +131,11 @@ export default () => {
         }
         // Recreate the dropped foreign key constraints
         await sequelizeDB.query(
-          'ALTER TABLE "PaperAuthor" ADD CONSTRAINT "PaperAuthor_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "Authors" ("id") ON DELETE CASCADE',
+          'ALTER TABLE "paperAuthor" ADD CONSTRAINT "paperAuthor_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "authors" ("id") ON DELETE CASCADE',
           { raw: true }
         );
         await sequelizeDB.query(
-          'ALTER TABLE "PaperAuthor" ADD CONSTRAINT "PaperAuthor_paperId_fkey" FOREIGN KEY ("paperId") REFERENCES "Papers" ("id") ON DELETE CASCADE',
+          'ALTER TABLE "paperAuthor" ADD CONSTRAINT "paperAuthor_paperId_fkey" FOREIGN KEY ("paperId") REFERENCES "papers" ("id") ON DELETE CASCADE',
           { raw: true }
         );
 

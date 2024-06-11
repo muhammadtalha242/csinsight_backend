@@ -83,7 +83,7 @@ module.exports = (sequelize) => {
 
   Papers.associate = (models) => {
     Papers.belongsToMany(models.authorTable, {
-      through: "PaperAuthor",
+      through: "paperAuthor",
       foreignKey: "paperId",
     });
   };
