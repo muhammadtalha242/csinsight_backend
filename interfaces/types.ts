@@ -49,7 +49,7 @@ export interface QueryFilters {
   venueIds?: string[];
   openAccess?: string;
   typesOfPaper?: string;
-  fieldsOfStudy?: string;
+  fieldsOfStudy?: string[];
   publishers?: string;
   citationsMin?: string;
   citationsMax?: string;

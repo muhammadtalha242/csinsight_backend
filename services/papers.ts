@@ -1,4 +1,3 @@
-
 import { Request, Response } from "express";
 import { FindAndCountOptions, FindOptions } from "sequelize";
 import * as fs from "fs";
@@ -13,20 +12,23 @@ import { decompressFile } from "../utils/fileReader";
 import axios from "axios";
 import { downloadFile } from "../utils/fileDownload";
 
-
 import { Sequelize, sequelize as sequelizeDB } from "../db/models";
 
 export default () => {
   const models = require("../db/models");
   const fs = require("fs");
   const csv = require("csv-parser");
-  const { paper: Papers, paperAuthor: PaperAuthor, authorTable: Author, sequelize } = models;
+  const {
+    paper: Papers,
+    paperAuthor: PaperAuthor,
+    authorTable: Author,
+    sequelize,
+  } = models;
   require("dotenv").config();
   // Add the association between PaperAuthor and Papers
   PaperAuthor.belongsTo(Papers, { foreignKey: "paperId" });
   Papers.hasMany(PaperAuthor, { foreignKey: "paperId" });
   return {
-
     addPapers: async (
       req: Request<{}, {}, {}, QueryFilters>,
       res: Response
@@ -49,13 +51,13 @@ export default () => {
         const fileUrls = response.data.files;
         //2. Download Files
         const filesDownloaded = [];
-        
+
         for (let index = 0; index < fileUrls.length; index++) {
           const url = fileUrls[index];
           const destinationPath = `./data/downloads/papers/Papers-${index}.gz`; // Replace with the desired destination path
           filesDownloaded.push(await downloadFile(url, destinationPath));
         }
-        console.log('Files downloaded successfully.');
+        console.log("Files downloaded successfully.");
         //3.Read files and upload them in db
 
         // Drop the foreign key constraints
@@ -196,18 +198,18 @@ export default () => {
           raw: true, // Returns raw result objects
         };
 
-        if (req.body.authorIds && req.body.authorIds.length > 0) {
-          queryObject["include"] = [
-            {
-              model: PaperAuthor,
-              attributes: [], // Exclude PaperAuthor attributes from the output
-              where: {
-                authorId: req.body.authorIds,
-              },
-              required: true, // Ensures an INNER JOIN
-            },
-          ];
-        }
+        // if (req.body.authorIds && req.body.authorIds.length > 0) {
+        //   queryObject["include"] = [
+        //     {
+        //       model: PaperAuthor,
+        //       attributes: [], // Exclude PaperAuthor attributes from the output
+        //       where: {
+        //         authorId: req.body.authorIds,
+        //       },
+        //       required: true, // Ensures an INNER JOIN
+        //     },
+        //   ];
+        // }
 
         const data = await Papers.findAll(queryObject);
 

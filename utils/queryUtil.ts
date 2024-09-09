@@ -1,6 +1,7 @@
 import { Op } from "sequelize";
 import { DatapointsOverTime, QueryFilters } from "../interfaces/types";
 import { NA } from "../constants";
+import { Sequelize } from "../db/models";
 
 export function buildMatchObject(query: QueryFilters): any {
   const matchObject: any = {};
@@ -15,13 +16,22 @@ export function buildMatchObject(query: QueryFilters): any {
       [Op.lte]: Number(query.yearEnd),
     };
   }
-  // if (query.authorIds && query.authorIds.length > 0) {
-  //   matchObject.authors = {
-  //     [Op.in]: query.authorIds,
-  //   };
-  // }
+  if (query.authorIds && query.authorIds.length > 0) {
+    // matchObject.authors = {
+    //   [Op.in]: query.authorIds,
+    // };
+    matchObject.authors = Sequelize.literal(`
+      EXISTS (
+        SELECT 1
+        FROM unnest(authors) AS element
+        WHERE element->>'authorId' IN (${query.authorIds
+          .map((f) => `'${f}'`)
+          .join(", ")})
+      )
+    `);
+  }
   if (query.venueIds && query.venueIds.length > 0) {
-    matchObject.venueId = {
+    matchObject.venue = {
       [Op.in]: query.venueIds,
     };
   }
@@ -29,14 +39,28 @@ export function buildMatchObject(query: QueryFilters): any {
     matchObject.openAccess = query.openAccess === "true";
   }
   if (query.typesOfPaper && query.typesOfPaper.length > 0) {
-    matchObject.typeOfPaper = {
-      [Op.in]: query.typesOfPaper,
+    matchObject.publicationtypes = {
+      [Op.contains]: query.typesOfPaper,
     };
   }
   if (query.fieldsOfStudy && query.fieldsOfStudy.length > 0) {
-    matchObject.fieldsOfStudy = {
-      [Op.contains]: query.fieldsOfStudy,
-    };
+    // matchObject.s2fieldsofstudy = {
+    //   [Op.contains]: [query.fieldsOfStudy],
+    // };
+    // matchObject.s2fieldsofstudy = Sequelize.literal(
+    //   `array_position(s2fieldsofstudy, '${JSON.stringify(
+    //     query.fieldsOfStudy
+    //   )}'::jsonb) IS NOT NULL`
+    // );
+    matchObject.s2fieldsofstudy = Sequelize.literal(`
+      EXISTS (
+        SELECT 1
+        FROM unnest(s2fieldsofstudy) AS element
+        WHERE element->>'category' IN (${query.fieldsOfStudy
+          .map((f) => `'${f}'`)
+          .join(", ")})
+      )
+    `);
   }
   if (query.publishers && query.publishers.length > 0) {
     matchObject.publisher = {
