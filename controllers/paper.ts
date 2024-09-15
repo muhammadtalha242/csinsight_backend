@@ -48,19 +48,12 @@ export default () => {
       res.json(data);
     },
     getS2FieldsOfStudy: async (req: Request, res: Response) => {
-      const cacheKey = "s2fieldsOfStudy";
-
-      // redisClient.del("s2fieldsOfStudy", (err, response) => {
-      //   if (err) throw err;
-      //   console.log(`Number of keys removed: ${response}`);
-      // });
-
+      const cacheKey = `s2fieldsOfStudy-${JSON.stringify(req.body)}`;
       const cachedData = await redisClient.get(cacheKey);
 
       if (cachedData) {
         return res.json(JSON.parse(cachedData));
       }
-
       const data = await paperService.getS2FieldsOfStudy(req, res);
       await redisClient.setex(cacheKey, 8000, JSON.stringify(data));
 
