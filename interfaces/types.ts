@@ -53,6 +53,7 @@ export interface QueryFilters {
   publishers?: string;
   citationsMin?: string;
   citationsMax?: string;
+  limit?: string;
 }
 export interface FindAndCountOptions {
   where: {};

@@ -29,11 +29,18 @@ export const getRoutes = () => {
   router.post("/authors/info", authorController.getAuthorsInfo);
   router.get("/authors/topk", authorController.getPapersTopk);
   router.get("/authors/quartiles", authorController.getPapersQuartiles);
+  router.post(
+    "/authors/publications-citations-correlation",
+    authorController.getPublicationsCitationsCorrelation
+  );
   router.get("/authors/addAuthors", authorController.addAuthors);
 
   // Venue Routes
   router.get("/venues", venueController.getVenues);
   router.get("/venues/addVenues", venueController.addVenues);
+  router.post("/venues/topVenues", venueController.getTopVenues);
+  router.post("/venues/venueImpact", venueController.getVenueImpactAnalysis);
+  router.post("/venues/fieldsOfStudyDistribution", venueController.getFieldsOfStudyDistribution);
   router.get("/venues/:id", venueController.getVenueById);
   router.post("/venues", venueController.createVenue);
   router.post("/venues/info", venueController.getVenuesInfo);

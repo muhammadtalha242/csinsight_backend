@@ -3,18 +3,19 @@ import { DatapointsOverTime, QueryFilters } from "../interfaces/types";
 import { NA } from "../constants";
 import { Sequelize } from "../db/models";
 
-export function buildMatchObject(query: QueryFilters): any {
+import { WhereOptions } from 'sequelize';
+
+export function buildMatchObject(query: QueryFilters): WhereOptions {
   const matchObject: any = {};
-  if (query.yearStart) {
-    matchObject.year = {
-      [Op.gte]: Number(query.yearStart),
-    };
-  }
-  if (query.yearEnd) {
-    matchObject.year = {
-      ...matchObject.year,
-      [Op.lte]: Number(query.yearEnd),
-    };
+
+  if (query.yearStart || query.yearEnd) {
+    matchObject.year = {};
+    if (query.yearStart) {
+      matchObject.year[Op.gte] = Number(query.yearStart);
+    }
+    if (query.yearEnd) {
+      matchObject.year[Op.lte] = Number(query.yearEnd);
+    }
   }
   if (query.authorIds && query.authorIds.length > 0) {
     // matchObject.authors = {
@@ -30,19 +31,23 @@ export function buildMatchObject(query: QueryFilters): any {
       )
     `);
   }
+
   if (query.venueIds && query.venueIds.length > 0) {
     matchObject.venue = {
       [Op.in]: query.venueIds,
     };
   }
+
   if (query.openAccess) {
     matchObject.openAccess = query.openAccess === "true";
   }
+
   if (query.typesOfPaper && query.typesOfPaper.length > 0) {
     matchObject.publicationtypes = {
-      [Op.contains]: query.typesOfPaper,
+      [Op.overlap]: query.typesOfPaper,
     };
   }
+
   if (query.fieldsOfStudy && query.fieldsOfStudy.length > 0) {
     // matchObject.s2fieldsofstudy = {
     //   [Op.contains]: [query.fieldsOfStudy],
@@ -62,25 +67,26 @@ export function buildMatchObject(query: QueryFilters): any {
       )
     `);
   }
+
   if (query.publishers && query.publishers.length > 0) {
     matchObject.publisher = {
       [Op.in]: query.publishers,
     };
   }
-  if (query.citationsMin) {
-    matchObject.citationcount = {
-      ...matchObject.citationcount,
-      [Op.gte]: Number(query.citationsMin),
-    };
+
+  if (query.citationsMin || query.citationsMax) {
+    matchObject.citationcount = {};
+    if (query.citationsMin) {
+      matchObject.citationcount[Op.gte] = Number(query.citationsMin);
+    }
+    if (query.citationsMax) {
+      matchObject.citationcount[Op.lte] = Number(query.citationsMax);
+    }
   }
-  if (query.citationsMax) {
-    matchObject.citationcount = {
-      ...matchObject.citationcount,
-      [Op.lte]: Number(query.citationsMax),
-    };
-  }
+
   return matchObject;
 }
+
 
 export function buildSortObject(sortField: string, sortDirection: string) {
   if (!sortField || !sortDirection) {

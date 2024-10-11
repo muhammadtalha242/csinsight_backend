@@ -10,7 +10,11 @@ import {
 } from "../interfaces/types";
 
 import { buildMatchObject, quartilePosition } from "../utils/queryUtil";
-import { decompressFile, readAndLoadFile, splitArrayIntoSubArrays } from "../utils/fileReader";
+import {
+  decompressFile,
+  readAndLoadFile,
+  splitArrayIntoSubArrays,
+} from "../utils/fileReader";
 import { downloadFile } from "../utils/fileDownload";
 import { Sequelize } from "../db/models";
 
@@ -149,9 +153,9 @@ export default () => {
         try {
           const findOptions: FindOptions = {
             where: buildMatchObject(req.query),
-            order: [["inCitationsCounts", "DESC"]],
+            order: [["citationcount", "DESC"]],
             limit: k,
-            attributes: ["title", "inCitationsCounts"],
+            attributes: ["title", "citationcount"],
           };
 
           const data = await Papers.findAll(findOptions);
@@ -198,6 +202,41 @@ export default () => {
         res.status(500).json({ message: error.message });
       }
     },
+    getPublicationsCitationsCorrelation: async (
+      req: Request<{}, {}, {}, QueryFilters>,
+      res: Response
+    ) => {
+      try {
+        // Optional: Limit the number of data points to avoid overloading the frontend
+        const limit = parseInt(req.query.limit) || 10; // Default to 10,000
+
+        // Fetch authors with their publication and citation counts
+        // Optionally apply filters or sorting
+        const authors = await Author.findAll({
+          attributes: ["name", "papercount", "citationcount"],
+          where: {
+            papercount: { [Op.gt]: 0 },
+            citationcount: { [Op.gt]: 0 },
+            name: { [Op.not]: [""] },
+          },
+          order: [["papercount", "DESC"]], // Adjust as needed
+          limit,
+        });
+
+        // Structure the response
+        const dataPoints = authors.map((author) => ({
+          x: author.papercount,
+          y: author.citationcount,
+          name: author.name,
+        }));
+
+        return dataPoints;
+      } catch (error) {
+        console.error("Error in /publications-citations-correlation:", error);
+        res.status(500).json({ error: "Internal server error" });
+      }
+    },
+
     addAuthors: async (
       req: Request<{}, {}, {}, QueryFilters>,
       res: Response
@@ -221,8 +260,8 @@ export default () => {
         //3.Read files and upload them in db
         for (let index = 0; index < filesDownloaded.length; index++) {
           const filePath = filesDownloaded[index];
-          const folderPath= "./data/authors"
-          
+          const folderPath = "./data/authors";
+
           const decompressedFilePath = await decompressFile(
             filePath,
             folderPath

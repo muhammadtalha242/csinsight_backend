@@ -180,8 +180,6 @@ export default () => {
     getPapersPost: async (req: Request<QueryFilters>, res: Response) => {
       console.log("req.bodu=y", req.body);
       const matchObject = buildMatchObject(req.body);
-      console.log("matchObject", matchObject);
-
       try {
         const queryObject = {
           attributes: [
@@ -212,9 +210,6 @@ export default () => {
         // }
 
         const data = await Papers.findAll(queryObject);
-
-        console.log(data);
-
         res.send(data);
       } catch (error) {
         res.status(500).json({ message: error.message });

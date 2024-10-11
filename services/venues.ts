@@ -1,6 +1,6 @@
 import axios from "axios";
 import { Request, Response } from "express";
-import { FindAndCountOptions, Op } from "sequelize";
+import { col, FindAndCountOptions, FindOptions, fn, Op } from "sequelize";
 import { downloadFile } from "../utils/fileDownload";
 import {
   decompressFile,
@@ -8,10 +8,12 @@ import {
   splitArrayIntoSubArrays,
 } from "../utils/fileReader";
 import { PagedParameters, QueryFilters } from "../interfaces/types";
+import { Sequelize } from "../db/models";
+import { buildMatchObject } from "../utils/queryUtil";
 
 export default () => {
   const models = require("../db/models");
-  const { venue: Venue } = models;
+  const { venue: Venue, paper: Papers, sequelize } = models;
   require("dotenv").config();
   return {
     searchVenueByName: async (req: Request, res: Response) => {
@@ -182,6 +184,121 @@ export default () => {
       } catch (error) {
         console.error(error);
         res.status(500).json({ success: false, error: "Server Error" });
+      }
+    },
+
+    getTopVenues: async (req: Request<QueryFilters>, res: Response) => {
+      try {
+        // Optional: Extract query parameters for dynamic filtering
+        const { topN } = req.query;
+        const limit = topN ? parseInt(topN as string, 10) : 10; // Default to top 10
+        const matchObject = buildMatchObject(req.body);
+        const findOptions: FindOptions = {
+          attributes: [
+            [Sequelize.fn("count", Sequelize.col("*")), "publicationCount"],
+            "venue",
+          ],
+          where: { ...matchObject, venue: { [Op.not]: [""] } },
+          group: ["publicationvenueid", "venue"],
+          order: [["publicationCount", "DESC"]],
+          limit,
+          raw: true,
+        };
+        const topVenues: { venue: string; publicationCount: string }[] =
+          await Papers.findAll(findOptions);
+
+        const data = topVenues.map((venue) => {
+          return {
+            venue: venue.venue,
+            publicationCount: parseInt(venue.publicationCount),
+          };
+        });
+
+        return data;
+      } catch (error) {
+        console.error("Error fetching top venues:", error);
+        return res.status(500).json({ error: "Internal server error" });
+      }
+    },
+
+    getVenueImpactAnalysis: async (
+      req: Request<QueryFilters>,
+      res: Response
+    ) => {
+      try {
+        const limit = 10; // You can adjust this as needed
+        interface VenueImpact {
+          venue: string;
+          averageCitations: number;
+        }
+        const matchObject = buildMatchObject(req.body);
+        console.log("🚀 ~ matchObject:", matchObject)
+        const findOptions: FindOptions = {
+          attributes: [
+            "venue",
+            [fn("AVG", col("citationcount")), "averageCitations"],
+          ],
+          where: {
+            ...matchObject,
+            publicationvenueid: { [Op.ne]: null },
+            venue: { [Op.not]: [""] },
+          },
+          group: ["publicationvenueid", "venue"],
+          order: [["averageCitations", "DESC"]],
+          limit,
+          raw: true,
+        };
+
+        const venueImpactRaw = await Papers.findAll(findOptions);
+
+        // Map the raw results to the desired format with averageCitations as number
+        const venueImpact: VenueImpact[] = venueImpactRaw.map(
+          (record: any) => ({
+            venue: record.venue,
+            averageCitations: parseFloat(record.averageCitations),
+          })
+        );
+
+        return venueImpact;
+      } catch (error) {
+        console.error("Error fetching venue impact analysis:", error);
+        return res.status(500).json({ error: "Internal server error" });
+      }
+    },
+    getFieldsOfStudyDistribution: async (
+      req: Request<QueryFilters>,
+      res: Response
+    ) => {
+      const matchObject = buildMatchObject(req.body);
+
+      const query = `
+        SELECT 
+            p.publicationvenueid,
+            p.venue,
+            unnest(p.s2fieldsofstudy) AS fieldOfStudy, 
+            COUNT(*) AS publicationCount
+        FROM 
+            papers p
+        WHERE 
+            p.publicationvenueid IS NOT NULL
+            AND p.s2fieldsofstudy IS NOT NULL
+            AND array_length(p.s2fieldsofstudy, 1) > 0
+        GROUP BY 
+            p.publicationvenueid,
+            p.venue,
+            unnest(p.s2fieldsofstudy)
+        ORDER BY  
+            publicationCount DESC
+        LIMIT 10;
+      `;
+      try {
+        const results = await sequelize.query(query, {
+          type: Sequelize.QueryTypes.SELECT,
+        });
+        return results;
+      } catch (error) {
+        console.error("Error executing query:", error);
+        throw error;
       }
     },
 
